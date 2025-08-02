@@ -1,131 +1,93 @@
-import { NextResponse } from "next/server"
-import { getDatabase } from "@/lib/mongodb"
-import type { DashboardStats } from "@/types/review"
+import { reviewService } from '@/lib/services/reviewService';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const db = await getDatabase()
-    const reviews = db.collection("reviews")
+    const { searchParams } = new URL(request.url);
+    const profileId = searchParams.get('profileId');
 
-    // Get basic stats
-    const totalReviews = await reviews.countDocuments()
-    const pendingReplies = await reviews.countDocuments({ replyStatus: "pending" })
-    const repliedReviews = await reviews.countDocuments({ replyStatus: "replied" })
-    const responseRate = totalReviews > 0 ? Math.round((repliedReviews / totalReviews) * 100) : 0
+    console.log('=== Stats API Called ===');
+    console.log('Profile ID filter:', profileId);
 
-    // Calculate average rating
-    const ratingPipeline = [
-      {
-        $addFields: {
-          numericRating: {
-            $switch: {
-              branches: [
-                { case: { $eq: ["$starRating", "ONE"] }, then: 1 },
-                { case: { $eq: ["$starRating", "TWO"] }, then: 2 },
-                { case: { $eq: ["$starRating", "THREE"] }, then: 3 },
-                { case: { $eq: ["$starRating", "FOUR"] }, then: 4 },
-                { case: { $eq: ["$starRating", "FIVE"] }, then: 5 },
-              ],
-              default: 0,
-            },
+    // Test database connection first
+    try {
+      const testCollection = await reviewService['getCollection']('reviews');
+      const testCount = await testCollection.countDocuments();
+      console.log('Database connection test - Document count:', testCount);
+
+      if (testCount === 0) {
+        console.log('No documents found in reviews collection');
+        return NextResponse.json({
+          dashboardStats: {
+            totalReviews: 0,
+            pendingReplies: 0,
+            averageRating: 0,
+            responseRate: 0,
+            reviewTrends: [],
+            ratingDistribution: [],
+            lastUpdated: new Date(),
           },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: "$numericRating" },
-        },
-      },
-    ]
+          profileStats: [],
+        });
+      }
 
-    const ratingResult = await reviews.aggregate(ratingPipeline).toArray()
-    const averageRating = ratingResult[0]?.averageRating || 0
-
-    // Get review trends (last 6 months)
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-
-    const trendsPipeline = [
-      {
-        $match: {
-          createTime: { $gte: sixMonthsAgo.toISOString() },
-        },
-      },
-      {
-        $addFields: {
-          month: {
-            $dateToString: {
-              format: "%Y-%m",
-              date: { $dateFromString: { dateString: "$createTime" } },
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$month",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    ]
-
-    const trendsResult = await reviews.aggregate(trendsPipeline).toArray()
-    const reviewTrends = trendsResult.map((item) => ({
-      month: item._id,
-      count: item.count,
-    }))
-
-    // Get rating distribution
-    const distributionPipeline = [
-      {
-        $addFields: {
-          numericRating: {
-            $switch: {
-              branches: [
-                { case: { $eq: ["$starRating", "ONE"] }, then: 1 },
-                { case: { $eq: ["$starRating", "TWO"] }, then: 2 },
-                { case: { $eq: ["$starRating", "THREE"] }, then: 3 },
-                { case: { $eq: ["$starRating", "FOUR"] }, then: 4 },
-                { case: { $eq: ["$starRating", "FIVE"] }, then: 5 },
-              ],
-              default: 0,
-            },
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$numericRating",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    ]
-
-    const distributionResult = await reviews.aggregate(distributionPipeline).toArray()
-    const ratingDistribution = distributionResult.map((item) => ({
-      rating: item._id,
-      count: item.count,
-    }))
-
-    const stats: DashboardStats = {
-      totalReviews,
-      pendingReplies,
-      averageRating: Math.round(averageRating * 10) / 10,
-      responseRate,
-      reviewTrends,
-      ratingDistribution,
+      // Get a sample document to check structure
+      const sampleDoc = await testCollection.findOne();
+      console.log('Sample document keys:', Object.keys(sampleDoc || {}));
+    } catch (dbError) {
+      console.error('Database connection test failed:', dbError);
+      throw new Error(
+        `Database connection failed: ${
+          dbError instanceof Error ? dbError.message : 'Unknown error'
+        }`,
+      );
     }
 
-    return NextResponse.json(stats)
+    console.log('Fetching dashboard stats...');
+    const dashboardStats = await reviewService.getDashboardStats();
+    console.log('Dashboard stats fetched:', dashboardStats);
+
+    console.log('Fetching profile stats...');
+    const profileStats = await reviewService.getProfileStats();
+    console.log('Profile stats fetched:', profileStats);
+
+    if (profileId && profileId !== 'all') {
+      const profile = profileStats.find((p) => p.profileId === profileId);
+      if (profile) {
+        return NextResponse.json({
+          profile,
+          dashboardStats: {
+            ...dashboardStats,
+            totalReviews: profile.totalReviews,
+            pendingReplies: profile.pendingReplies,
+            averageRating: profile.averageRating,
+            responseRate: profile.responseRate,
+          },
+        });
+      }
+    }
+
+    console.log('=== Stats API Success ===');
+    return NextResponse.json({
+      dashboardStats,
+      profileStats,
+    });
   } catch (error) {
-    console.error("Stats API error:", error)
-    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
+    console.error('=== Stats API Error ===');
+    console.error('Error details:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to fetch stats',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: {
+          timestamp: new Date().toISOString(),
+          endpoint: '/api/stats',
+        },
+      },
+      { status: 500 },
+    );
   }
 }

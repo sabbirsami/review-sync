@@ -1,48 +1,59 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getDatabase } from "@/lib/mongodb"
-import type { Review } from "@/types/review"
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const db = await getDatabase()
+    const body = await request.json();
 
-    // Transform the n8n review data
-    const review: Review = {
-      reviewId: body.reviewId,
-      businessProfileId: extractProfileId(body.name),
-      businessProfileName: getProfileName(body.name),
-      reviewer: body.reviewer,
-      starRating: body.starRating,
-      comment: body.comment,
-      createTime: body.createTime,
-      updateTime: body.updateTime,
-      reviewReply: body.reviewReply,
-      replyStatus: body.reviewReply ? "replied" : "pending",
-      name: body.name,
+    // Log the incoming webhook data from n8n
+    console.log('Received n8n webhook data:', JSON.stringify(body, null, 2));
+
+    // Process the review data
+    // This is where you would:
+    // 1. Validate the incoming data
+    // 2. Save to your database
+    // 3. Update statistics
+    // 4. Trigger any additional workflows
+
+    // Example processing:
+    if (body.reviewId && body.businessProfileId) {
+      // Save review to database
+      const reviewData = {
+        reviewId: body.reviewId,
+        businessProfileId: body.businessProfileId,
+        businessProfileName: body.businessProfileName || 'Unknown Profile',
+        reviewer: body.reviewer || {},
+        starRating: body.starRating,
+        comment: body.comment,
+        createTime: body.createTime,
+        updateTime: body.updateTime,
+        reviewReply: body.reviewReply,
+        replyStatus: body.reviewReply ? 'replied' : 'pending',
+        sentimentScore: body.sentimentScore,
+        responseTimeHours: body.responseTimeHours,
+        name: body.name,
+      };
+
+      // Here you would save to your database
+      console.log('Processed review data:', reviewData);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Review webhook processed successfully',
+        reviewId: body.reviewId,
+      });
     }
 
-    // Upsert the review (update if exists, insert if new)
-    await db.collection("reviews").replaceOne({ reviewId: review.reviewId }, review, { upsert: true })
-
-    return NextResponse.json({ success: true, message: "Review processed" })
+    return NextResponse.json({ success: false, message: 'Invalid review data' }, { status: 400 });
   } catch (error) {
-    console.error("Webhook error:", error)
-    return NextResponse.json({ error: "Failed to process review" }, { status: 500 })
+    console.error('Error processing n8n webhook:', error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
 
-function extractProfileId(name: string): string {
-  const match = name.match(/locations\/(\d+)/)
-  return match ? match[1] : "unknown"
-}
-
-function getProfileName(name: string): string {
-  // You can maintain a mapping of profile IDs to names
-  const profileNames: Record<string, string> = {
-    "11832958934823586542": "Cardamom Restaurant",
-    // Add other profiles
-  }
-  const profileId = extractProfileId(name)
-  return profileNames[profileId] || `Profile ${profileId}`
+// Handle GET requests for webhook verification
+export async function GET() {
+  return NextResponse.json({
+    message: 'n8n Review Webhook Endpoint',
+    status: 'active',
+  });
 }
