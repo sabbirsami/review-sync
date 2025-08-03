@@ -265,10 +265,10 @@ export default function AllReviewsPage() {
       <div className="p-6 space-y-6">
         {/* Enhanced Filters with Slide Animation */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
+          className={`transition-all duration-300 pt-6 ease-in-out ${
             showFilters
               ? 'opacity-100 translate-y-0'
-              : 'opacity-0 -translate-y-4 pointer-events-none'
+              : 'opacity-100 -translate-y-4 pointer-events-none'
           }`}
         >
           <Card className="border-0 shadow-xl shadow-blue-500/10 bg-white/80 backdrop-blur-sm">
@@ -290,9 +290,9 @@ export default function AllReviewsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="replied">✅ Replied</SelectItem>
-                    <SelectItem value="pending">⏳ Pending</SelectItem>
-                    <SelectItem value="ignored">❌ Ignored</SelectItem>
+                    <SelectItem value="replied">Replied</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="ignored">Ignored</SelectItem>
                   </SelectContent>
                 </Select>
 
