@@ -250,9 +250,9 @@ export default function ProfessionalDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="min-h-screen bg-gradient-to- br from-gray-50 via-white to-gray-100">
       {/* Mobile-First Professional Header */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-white/95 border-b border-gray-200/50 shadow-sm">
+      <div className="sticky top-0 z-50 backdrop-blur-xl bg- white/95  shadow-sm">
         <div className="w-full px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
             <div className="space-y-2">
