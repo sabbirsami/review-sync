@@ -195,7 +195,7 @@ export default function AllReviewsPage() {
       <CardContent className="px-6 flex flex-col">
         {/* Header Section */}
         <div className="flex-shrink-0 mb-4">
-          <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
@@ -227,8 +227,8 @@ export default function AllReviewsPage() {
         </div>
         {/* Review Content */}
         <div className="flex-grow flex flex-col">
-          <h5 className="font-semibold text-[#1B5551] text-sm mb-0.5">Customer Review</h5>
-          <div className="bg-[#F0EDE0]/60 rounded-sm px-2 pt-1 pb-2 border border-[#D1D9D8]/30 mb-4 backdrop-blur-sm">
+          {/* <h5 className="font-semibold text-[#1B5551] text-sm mb-0.5">Customer Review</h5> */}
+          <div className="bg-[#F0EDE0]/0 rounded-sm  mb-3 backdrop-blur-sm">
             <div className="relative">
               <p
                 className={`text-[#1B5551] leading-relaxed text-sm transition-all duration-300 ${
@@ -258,7 +258,7 @@ export default function AllReviewsPage() {
             </div>
           </div>
           {/* Action Section */}
-          <div className="mt-auto">
+          <div className="pt-2 text-xs border-t border-background">
             {review.reviewReply ? (
               <div className="space-y-2">
                 <button
@@ -266,7 +266,7 @@ export default function AllReviewsPage() {
                   className="w-full text-left group"
                 >
                   <div className="flex items-center justify-between  transition-colors">
-                    <div className="flex items-center text-sm text-[#0B5C58] font-medium">
+                    <div className="flex items-center text-xs text-[#0B5C58] font-medium">
                       <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
                     {expandedReplies[review.reviewId] ? (
@@ -283,7 +283,7 @@ export default function AllReviewsPage() {
                         {new Date(review.reviewReply.updateTime).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-[#1B5551] leading-relaxed text-sm">
+                    <p className="text-[#1B5551] leading-relaxed text-xs">
                       {review.reviewReply.comment.length > 100
                         ? `${review.reviewReply.comment.slice(0, 100)}...`
                         : review.reviewReply.comment}
