@@ -67,7 +67,9 @@ export default function AllReviewsPage() {
         ...(filterRating !== 'all' && { rating: filterRating }),
         ...(filterProfile !== 'all' && { profileId: filterProfile }),
       });
-      const response = await fetch(`/api/reviews?${params}`);
+      const response = await fetch(`/api/reviews?${params}`, {
+        cache: 'force-cache', // or 'no-store' or 'revalidate'
+      });
       const data = await response.json();
       if (data.reviews) {
         setReviews(data.reviews);
