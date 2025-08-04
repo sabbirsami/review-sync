@@ -248,7 +248,7 @@ export default function ProfessionalDashboard() {
       <CardContent className="px-6 flex flex-col">
         {/* Header Section */}
         <div className="flex-shrink-0 mb-4">
-          <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
@@ -258,7 +258,7 @@ export default function ProfessionalDashboard() {
                 />
               </div>
               <div className="space-y-1">
-                <h4 className="font-semibold text-[#1B5551] text-sm">
+                <h4 className="font-semibold text-[#1B5551] text-sm grow">
                   {review.reviewer.displayName.length > 20
                     ? `${review.reviewer.displayName.slice(0, 20)}...`
                     : review.reviewer.displayName}
@@ -278,11 +278,10 @@ export default function ProfessionalDashboard() {
             <div className="flex items-center gap-0.5">{getRatingStars(review.starRating)}</div>
           </div>
         </div>
-
         {/* Review Content */}
         <div className="flex-grow flex flex-col">
-          <h5 className="font-semibold text-[#1B5551] text-sm mb-0.5">Customer Review</h5>
-          <div className="bg-[#F0EDE0]/60 rounded-sm px-2 pt-1 pb-2 border border-[#D1D9D8]/30 mb-4 backdrop-blur-sm">
+          {/* <h5 className="font-semibold text-[#1B5551] text-sm mb-0.5">Customer Review</h5> */}
+          <div className="bg-[#F0EDE0]/0 rounded-sm  mb-3 backdrop-blur-sm">
             <div className="relative">
               <p
                 className={`text-[#1B5551] leading-relaxed text-sm transition-all duration-300 ${
@@ -311,17 +310,16 @@ export default function ProfessionalDashboard() {
               )}
             </div>
           </div>
-
           {/* Action Section */}
-          <div className="mt-auto">
+          <div className="pt-2 text-xs border-t border-background">
             {review.reviewReply ? (
               <div className="space-y-2">
                 <button
                   onClick={() => toggleReplyExpand(review.reviewId)}
                   className="w-full text-left group"
                 >
-                  <div className="flex items-center justify-between transition-colors">
-                    <div className="flex items-center text-sm text-[#0B5C58] font-medium">
+                  <div className="flex items-center justify-between  transition-colors">
+                    <div className="flex items-center text-xs text-[#0B5C58] font-medium">
                       <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
                     {expandedReplies[review.reviewId] ? (
@@ -338,7 +336,7 @@ export default function ProfessionalDashboard() {
                         {new Date(review.reviewReply.updateTime).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-[#1B5551] leading-relaxed text-sm">
+                    <p className="text-[#1B5551] leading-relaxed text-xs">
                       {review.reviewReply.comment.length > 100
                         ? `${review.reviewReply.comment.slice(0, 100)}...`
                         : review.reviewReply.comment}
@@ -347,13 +345,11 @@ export default function ProfessionalDashboard() {
                 )}
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border-l-4 border-amber-400">
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-sm p-4 border-l-4 border-amber-400">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-amber-600" />
-                    <span className="text-sm font-semibold text-amber-800">
-                      ⏳ Awaiting Response
-                    </span>
+                    <span className="text-sm font-semibold text-amber-800">Awaiting Response</span>
                   </div>
                   <div className="flex gap-2">
                     <Button
