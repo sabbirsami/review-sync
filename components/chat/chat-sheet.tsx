@@ -104,26 +104,26 @@ const ChatSheet = () => {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 z-50"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] shadow-lg hover:shadow-xl transition-all duration-200 z-50"
           size="icon"
         >
-          <MessageCircle className="h-6 w-6 text-white" />
+          <MessageCircle className="h-10 w-10 text-white" />
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:w-[480px] p-0 flex flex-col">
-        <SheetHeader className="border-b border-slate-200/50 p-4 bg-white/80 backdrop-blur-sm">
+      <SheetContent className="w-full sm:w-[580px] p-0 flex flex-col">
+        <SheetHeader className="border-b border-[#D1D9D8] p-4 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#0B5C58] to-[#1B5551] rounded-xl flex items-center justify-center shadow-lg">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full animate-pulse"></div>
               </div>
               <div>
-                <SheetTitle className="font-semibold text-lg bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                  AI Assistant
+                <SheetTitle className="font-semibold text-lg text-[#1B5551]">
+                  AI Review Assistant
                 </SheetTitle>
                 <div className="flex items-center gap-1 text-xs text-emerald-600">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -135,7 +135,7 @@ const ChatSheet = () => {
         </SheetHeader>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white via-slate-50 to-blue-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F7F4E9]">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -152,8 +152,8 @@ const ChatSheet = () => {
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                      : 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                      ? 'bg-gradient-to-br from-[#0B5C58] to-[#1B5551]'
+                      : 'bg-gradient-to-br from-[#0B5C58] to-[#1B5551]'
                   } shadow-lg`}
                 >
                   {message.sender === 'user' ? (
@@ -167,14 +167,14 @@ const ChatSheet = () => {
                 <div
                   className={`relative px-4 py-3 rounded-2xl shadow-sm ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md'
+                      ? 'bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white rounded-br-md'
                       : message.type === 'analysis'
-                      ? 'bg-gradient-to-r from-emerald-50 to-blue-50 text-slate-800 border border-emerald-200/50 rounded-bl-md'
-                      : 'bg-white text-slate-800 border border-slate-200/50 rounded-bl-md'
+                      ? 'bg-gradient-to-r from-[#F0EDE0] to-white text-[#1B5551] border border-[#D1D9D8] rounded-bl-md'
+                      : 'bg-white text-[#1B5551] border border-[#D1D9D8] rounded-bl-md'
                   }`}
                 >
                   {message.type === 'analysis' && (
-                    <div className="flex items-center gap-1 text-xs text-emerald-600 mb-2">
+                    <div className="flex items-center gap-1 text-xs text-[#0B5C58] mb-2">
                       <Sparkles className="w-3 h-3" />
                       <span>AI Analysis</span>
                     </div>
@@ -182,7 +182,7 @@ const ChatSheet = () => {
                   <p className="leading-relaxed">{message.text}</p>
                   <div
                     className={`flex items-center gap-1 mt-2 text-xs ${
-                      message.sender === 'user' ? 'text-blue-100' : 'text-slate-500'
+                      message.sender === 'user' ? 'text-[#A8D5D1]' : 'text-[#1B5551]/70'
                     }`}
                   >
                     <Clock className="w-3 h-3" />
@@ -203,23 +203,23 @@ const ChatSheet = () => {
           {isTyping && (
             <div className="flex justify-start animate-fadeIn">
               <div className="flex gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#0B5C58] to-[#1B5551] rounded-full flex items-center justify-center shadow-lg">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
-                <div className="bg-white border border-slate-200/50 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
+                <div className="bg-white border border-[#D1D9D8] px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
                   <div className="flex items-center gap-1">
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-[#1B5551]/60 rounded-full animate-bounce"></div>
                       <div
-                        className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-[#1B5551]/60 rounded-full animate-bounce"
                         style={{ animationDelay: '0.1s' }}
                       ></div>
                       <div
-                        className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-[#1B5551]/60 rounded-full animate-bounce"
                         style={{ animationDelay: '0.2s' }}
                       ></div>
                     </div>
-                    <span className="text-xs text-slate-500 ml-2">AI is thinking...</span>
+                    <span className="text-xs text-[#1B5551]/70 ml-2">AI is thinking...</span>
                   </div>
                 </div>
               </div>
@@ -230,9 +230,9 @@ const ChatSheet = () => {
 
         {/* Quick Suggestions */}
         {messages.length === 1 && (
-          <div className="px-4 pb-2 bg-gradient-to-b from-white via-slate-50 to-blue-50">
-            <div className="text-xs text-slate-600 mb-2 flex items-center gap-2">
-              <Zap className="w-3 h-3" />
+          <div className="px-4 pb-2 bg-[#F7F4E9]">
+            <div className="text-xs text-[#1B5551]/70 mb-2 flex items-center gap-2">
+              <Zap className="w-3 h-3 text-[#FBD686]" />
               <span>Quick actions:</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -240,7 +240,7 @@ const ChatSheet = () => {
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-3 py-1.5 text-xs bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-full transition-all duration-200 hover:shadow-sm"
+                  className="px-3 py-1.5 text-xs bg-white hover:bg-[#0B5C58]/10 border border-[#D1D9D8] hover:border-[#0B5C58] rounded-full transition-all duration-200 hover:shadow-sm text-[#1B5551]"
                 >
                   {suggestion}
                 </button>
@@ -250,15 +250,15 @@ const ChatSheet = () => {
         )}
 
         {/* Input Area */}
-        <div className="border-t border-slate-200/50 p-4 bg-white/80 backdrop-blur-sm">
+        <div className="border-t border-[#D1D9D8] p-4 bg-white">
           <div className="relative">
-            <div className="flex items-end gap-3 bg-white rounded-2xl border border-slate-200/50 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500/50 transition-all">
+            <div className="flex items-end gap-3 bg-white rounded-2xl border border-[#D1D9D8] shadow-sm focus-within:ring-2 focus-within:ring-[#0B5C58]/20 focus-within:border-[#0B5C58]/50 transition-all">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about reviews, analytics, or get AI suggestions..."
-                className="flex-1 p-4 bg-transparent border-none focus:outline-none resize-none text-sm placeholder-slate-400 min-h-[44px] max-h-32"
+                className="flex-1 p-4 bg-transparent border-none focus:outline-none resize-none text-sm placeholder-[#1B5551]/60 min-h-[44px] max-h-32 text-[#1B5551]"
                 rows={1}
                 style={{
                   height: 'auto',
@@ -272,7 +272,7 @@ const ChatSheet = () => {
               />
               <div className="flex items-center gap-2 p-2">
                 <button
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
+                  className="p-2 text-[#1B5551]/60 hover:text-[#1B5551] hover:bg-[#F0EDE0] rounded-lg transition-all"
                   title="Attach file"
                 >
                   <Paperclip className="w-4 h-4" />
@@ -280,7 +280,7 @@ const ChatSheet = () => {
                 <button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isTyping}
-                  className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+                  className="p-2 bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] disabled:from-[#D1D9D8] disabled:to-[#D1D9D8] text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
                   title="Send message"
                 >
                   <Send className="w-4 h-4" />
@@ -289,7 +289,9 @@ const ChatSheet = () => {
             </div>
             {/* Character count for long messages */}
             {inputValue.length > 200 && (
-              <div className="text-xs text-slate-500 mt-1 text-right">{inputValue.length}/500</div>
+              <div className="text-xs text-[#1B5551]/60 mt-1 text-right">
+                {inputValue.length}/500
+              </div>
             )}
           </div>
         </div>

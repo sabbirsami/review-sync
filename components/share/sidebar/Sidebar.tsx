@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
@@ -147,27 +148,20 @@ const Sidebar: React.FC = () => {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="h-screen sticky top-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col shadow-2xl">
+    <div className="h-screen sticky top-0 bg-sidebar flex flex-col shadow-2xl border-r border-sidebar-border">
       {/* Enhanced Logo Section */}
-      <div className="py-6 px-6 border-b border-slate-700/50">
+      <div className="py-6 px-6 border-b border-sidebar-border">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
+          <Image
+            src="/logo-primary.png"
+            className="h-8 w-auto"
+            width={110}
+            height={110}
+            alt="ReviewSync Logo"
+          />
           <div>
-            <span className="font-bold text-xl text-white">ReviewSync</span>
-            <div className="text-xs text-slate-400">Professional</div>
+            <span className="font-bold text-xl text-sidebar-foreground">ReviewSync</span>
+            <div className="text-xs text-sidebar-muted-foreground -mt-0.5 ps-0.5">Professional</div>
           </div>
         </div>
       </div>
@@ -175,7 +169,7 @@ const Sidebar: React.FC = () => {
       {/* Enhanced Search */}
       <div className="p-4">
         <div className="relative group">
-          <div className="absolute text-slate-400 group-focus-within:text-blue-400 inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors">
+          <div className="absolute text-sidebar-muted-foreground group-focus-within:text-sidebar-accent inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors">
             <SearchIcon />
           </div>
           <input
@@ -183,13 +177,13 @@ const Sidebar: React.FC = () => {
             placeholder="Quick search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl leading-5 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm text-white backdrop-blur-sm transition-all"
+            className="block w-full pl-10 pr-3 py-3 bg-sidebar-muted border border-sidebar-border rounded-xl leading-5 placeholder-sidebar-muted-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-ring/50 focus:border-sidebar-accent text-sm text-sidebar-foreground transition-all"
           />
         </div>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+      <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-muted-foreground/30 scrollbar-track-sidebar-muted">
         <div>
           {menuItems.map((item, index) => (
             <div key={index} className="mb-1">
@@ -201,10 +195,10 @@ const Sidebar: React.FC = () => {
                   onValueChange={setOpenItem}
                 >
                   <AccordionItem value={`item-${index}`} className="border-none">
-                    <AccordionTrigger className="w-full py-3 px-4 hover:bg-slate-800/50 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:no-underline group transition-all duration-200">
+                    <AccordionTrigger className="w-full py-3 px-4 hover:bg-sidebar-primary/10 hover:border hover:border-sidebar-primary/30 rounded-xl text-sm font-medium text-sidebar-foreground hover:text-sidebar-primary hover:no-underline group transition-all duration-200">
                       <span className="flex items-center justify-between w-full">
                         <span className="flex items-center gap-3">
-                          <span className="group-hover:text-blue-400 transition-colors">
+                          <span className="group-hover:text-primary transition-colors">
                             <item.icon />
                           </span>
                           <span>{item.label}</span>
@@ -213,8 +207,8 @@ const Sidebar: React.FC = () => {
                           <span
                             className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                               typeof item.badge === 'string'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
-                                : 'bg-slate-700 text-slate-300'
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                : 'bg-sidebar-muted text-sidebar-muted-foreground'
                             }`}
                           >
                             {item.badge}
@@ -230,14 +224,16 @@ const Sidebar: React.FC = () => {
                             href={subItem.path}
                             className={`flex items-center justify-between px-4 py-2.5 text-sm rounded-lg transition-all duration-200 ${
                               pathname.startsWith(subItem.path)
-                                ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400 font-medium border border-blue-500/30 shadow-lg shadow-blue-500/10'
-                                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                                ? 'bg-sidebar-primary/10 text-sidebar-primary font-medium border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
+                                : 'text-sidebar-muted-foreground hover:bg-sidebar-primary/10 hover:text-sidebar-primary hover:border hover:border-sidebar-primary/30'
                             }`}
                           >
                             <div className="flex items-center">
                               <div
                                 className={`w-2 h-2 rounded-full mr-3 ${
-                                  pathname.startsWith(subItem.path) ? 'bg-blue-400' : 'bg-slate-500'
+                                  pathname.startsWith(subItem.path)
+                                    ? 'bg-sidebar-primary'
+                                    : 'bg-sidebar-muted-foreground'
                                 }`}
                               ></div>
                               <span>{subItem.label}</span>
@@ -246,8 +242,8 @@ const Sidebar: React.FC = () => {
                               <span
                                 className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                                   pathname.startsWith(subItem.path)
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-slate-700 text-slate-400'
+                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                                    : 'bg-sidebar-muted text-sidebar-muted-foreground'
                                 }`}
                               >
                                 {subItem.badge}
@@ -264,14 +260,14 @@ const Sidebar: React.FC = () => {
                   href={item.path!}
                   className={`flex items-center justify-between w-full text-sm py-3 px-4 rounded-xl transition-all duration-200 font-medium group ${
                     isActive(item.path!)
-                      ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400 font-semibold border border-blue-500/30 shadow-lg shadow-blue-500/10'
-                      : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+                      ? 'bg-sidebar-primary/10 text-sidebar-primary font-semibold border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
+                      : 'text-sidebar-foreground hover:bg-sidebar-primary/10 hover:text-sidebar-primary hover:border hover:border-sidebar-primary/30'
                   }`}
                 >
                   <span className="flex items-center gap-3">
                     <span
-                      className={`group-hover:text-blue-400 transition-colors ${
-                        isActive(item.path!) ? 'text-blue-400' : ''
+                      className={`group-hover:text-sidebar-accent transition-colors ${
+                        isActive(item.path!) ? 'text-sidebar-primary' : ''
                       }`}
                     >
                       <item.icon />
@@ -282,10 +278,10 @@ const Sidebar: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                         typeof item.badge === 'string'
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                           : isActive(item.path!)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-slate-700 text-slate-300'
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'bg-sidebar-muted text-sidebar-muted-foreground'
                       }`}
                     >
                       {item.badge}
@@ -299,16 +295,16 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Enhanced Bottom Section */}
-      <div className="border-t border-slate-700/50 p-4 bg-slate-900/50 backdrop-blur-sm">
+      <div className="border-t border-sidebar-border p-4 bg-sidebar-muted/50">
         {/* User Profile Section */}
-        <div className="mb-4 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
+        <div className="mb-4 p-3 bg-sidebar-muted rounded-xl border border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+            <div className="w-10 h-10 bg-sidebar-accent rounded-full flex items-center justify-center text-sidebar-accent-foreground font-semibold text-sm shadow-lg">
               JD
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-white truncate">John Doe</div>
-              <div className="text-xs text-slate-400 truncate">Business Owner</div>
+              <div className="text-sm font-medium text-sidebar-foreground truncate">John Doe</div>
+              <div className="text-xs text-sidebar-muted-foreground truncate">Business Owner</div>
             </div>
             <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
           </div>
@@ -325,13 +321,13 @@ const Sidebar: React.FC = () => {
                 href={item.path!}
                 className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                   active
-                    ? 'bg-slate-800 text-white border border-slate-600'
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                    ? 'bg-sidebar-muted text-sidebar-foreground border border-sidebar-border'
+                    : 'text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground'
                 }`}
               >
                 <span
-                  className={`group-hover:text-blue-400 transition-colors ${
-                    active ? 'text-blue-400' : ''
+                  className={`group-hover:text-sidebar-accent transition-colors ${
+                    active ? 'text-sidebar-primary' : ''
                   }`}
                 >
                   <Icon />
@@ -344,7 +340,7 @@ const Sidebar: React.FC = () => {
 
         {/* Version Info */}
         <div className="mt-4 text-center">
-          <div className="text-xs text-slate-500">v2.1.0</div>
+          <div className="text-xs text-sidebar-muted-foreground">v2.1.0</div>
         </div>
       </div>
     </div>

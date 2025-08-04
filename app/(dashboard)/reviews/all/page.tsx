@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
+import Header from '@/components/share/header/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,20 +13,18 @@ import {
 } from '@/components/ui/select';
 import {
   AlertCircle,
-  Building2,
   Calendar,
-  CheckCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Download,
   Eye,
-  Filter,
   MessageSquare,
   RefreshCw,
   Search,
   Sparkles,
   Star,
-  TrendingUp,
-  User,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -63,6 +55,8 @@ export default function AllReviewsPage() {
   const [filterRating, setFilterRating] = useState('all');
   const [filterProfile, setFilterProfile] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
+  const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
 
   const fetchReviews = async () => {
     try {
@@ -73,10 +67,8 @@ export default function AllReviewsPage() {
         ...(filterRating !== 'all' && { rating: filterRating }),
         ...(filterProfile !== 'all' && { profileId: filterProfile }),
       });
-
       const response = await fetch(`/api/reviews?${params}`);
       const data = await response.json();
-
       if (data.reviews) {
         setReviews(data.reviews);
       }
@@ -91,6 +83,20 @@ export default function AllReviewsPage() {
     fetchReviews();
   }, [filterStatus, filterRating, filterProfile]);
 
+  const toggleReviewExpand = (reviewId: string) => {
+    setExpandedReviews((prev) => ({
+      ...prev,
+      [reviewId]: !prev[reviewId],
+    }));
+  };
+
+  const toggleReplyExpand = (reviewId: string) => {
+    setExpandedReplies((prev) => ({
+      ...prev,
+      [reviewId]: !prev[reviewId],
+    }));
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'replied':
@@ -98,16 +104,16 @@ export default function AllReviewsPage() {
       case 'pending':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'ignored':
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'replied':
-        return <CheckCircle className="w-3.5 h-3.5" />;
+        return <CheckCircle2 className="w-3.5 h-3.5" />;
       case 'pending':
         return <Clock className="w-3.5 h-3.5" />;
       case 'ignored':
@@ -131,13 +137,13 @@ export default function AllReviewsPage() {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < numRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
+        className={`w-4 h-4 ${i < numRating ? 'fill-[#FBD686] text-[#FBD686]' : 'text-[#D1D9D8]'}`}
       />
     ));
   };
 
   const getSentimentColor = (score?: number) => {
-    if (!score) return 'bg-slate-100 text-slate-700';
+    if (!score) return 'bg-[#F0EDE0] text-[#1B5551]';
     if (score >= 0.7) return 'bg-emerald-100 text-emerald-700';
     if (score >= 0.4) return 'bg-amber-100 text-amber-700';
     return 'bg-red-100 text-red-700';
@@ -155,11 +161,9 @@ export default function AllReviewsPage() {
       review.comment?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.reviewer.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.businessProfileName.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesStatus = filterStatus === 'all' || review.replyStatus === filterStatus;
     const matchesRating = filterRating === 'all' || review.starRating === filterRating;
     const matchesProfile = filterProfile === 'all' || review.businessProfileName === filterProfile;
-
     return matchesSearch && matchesStatus && matchesRating && matchesProfile;
   });
 
@@ -183,314 +187,306 @@ export default function AllReviewsPage() {
       return acc + rating;
     }, 0) / totalReviews;
 
+  const renderReviewCard = (review: Review) => (
+    <Card
+      key={review.reviewId}
+      className="border-2 border-[#D1D9D8] bg-white flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+    >
+      <CardContent className="px-6 flex flex-col">
+        {/* Header Section */}
+        <div className="flex-shrink-0 mb-4">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img
+                  src={review.reviewer.profilePhotoUrl || '/placeholder.svg'}
+                  alt={review.reviewer.displayName}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-md"
+                />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-semibold text-[#1B5551] text-sm">
+                  {review.reviewer.displayName.length > 20
+                    ? `${review.reviewer.displayName.slice(0, 20)}...`
+                    : review.reviewer.displayName}
+                </h4>
+                <div className="flex items-center gap-2 -mt-1 text-xs text-[#1B5551]/60">
+                  <Calendar className="w-3 h-3" />
+                  <span>
+                    {new Date(review.createTime).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-0.5">{getRatingStars(review.starRating)}</div>
+          </div>
+        </div>
+        {/* Review Content */}
+        <div className="flex-grow flex flex-col">
+          <h5 className="font-semibold text-[#1B5551] text-sm mb-0.5">Customer Review</h5>
+          <div className="bg-[#F0EDE0]/60 rounded-sm px-2 pt-1 pb-2 border border-[#D1D9D8]/30 mb-4 backdrop-blur-sm">
+            <div className="relative">
+              <p
+                className={`text-[#1B5551] leading-relaxed text-sm transition-all duration-300 ${
+                  expandedReviews[review.reviewId] ? '' : 'line-clamp-3'
+                }`}
+              >
+                {review.comment ? review.comment : 'No comment'}
+              </p>
+              {review?.comment?.length > 150 && (
+                <button
+                  onClick={() => toggleReviewExpand(review.reviewId)}
+                  className="mt-2 text-sm text-[#0B5C58] font-medium flex items-center hover:text-[#1B5551] transition-colors"
+                >
+                  {expandedReviews[review.reviewId] ? (
+                    <>
+                      <span>Show less</span>
+                      <ChevronUp className="w-4 h-4 ml-1" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Read more</span>
+                      <ChevronDown className="w-4 h-4 ml-1" />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Action Section */}
+          <div className="mt-auto">
+            {review.reviewReply ? (
+              <div className="space-y-2">
+                <button
+                  onClick={() => toggleReplyExpand(review.reviewId)}
+                  className="w-full text-left group"
+                >
+                  <div className="flex items-center justify-between  transition-colors">
+                    <div className="flex items-center text-sm text-[#0B5C58] font-medium">
+                      <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
+                    </div>
+                    {expandedReplies[review.reviewId] ? (
+                      <ChevronUp className="w-4 h-4 text-[#0B5C58]" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-[#0B5C58]" />
+                    )}
+                  </div>
+                </button>
+                {expandedReplies[review.reviewId] && (
+                  <div className="bg-gradient-to-br from-[#0B5C58]/5 to-[#0B5C58]/10 rounded-md p-4 border-l-4 border-[#0B5C58] backdrop-blur-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-[#1B5551]/60">
+                        {new Date(review.reviewReply.updateTime).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-[#1B5551] leading-relaxed text-sm">
+                      {review.reviewReply.comment.length > 100
+                        ? `${review.reviewReply.comment.slice(0, 100)}...`
+                        : review.reviewReply.comment}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-sm p-4 border-l-4 border-amber-400">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm font-semibold text-amber-800">Awaiting Response</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs border-[#D1D9D8] hover:bg-gray-50 flex-1 bg-transparent"
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Mark Read
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] text-white text-xs flex-1 shadow-lg"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Reply
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="flex justify-center items-center h-96">
-          <div className="text-center">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-pulse"></div>
-              <RefreshCw className="w-8 h-8 animate-spin absolute top-4 left-4 text-blue-600" />
-            </div>
-            <p className="text-slate-600 mt-4 font-medium">Loading your reviews...</p>
+      <div className="min-h-screen bg-[#F7F4E9] flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-[#0B5C58]/20 animate-pulse"></div>
+            <RefreshCw className="w-10 h-10 animate-spin absolute top-4 left-4 text-[#0B5C58]" />
           </div>
+          <h2 className="text-xl font-semibold text-[#1B5551] mb-2">Loading Reviews</h2>
+          <p className="text-[#1B5551]/70">Gathering your customer feedback...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Enhanced Header with Glass Effect */}
-      <div className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-lg shadow-blue-500/5">
-        <div className="p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                Review Management Hub
-              </h1>
-              <p className="text-slate-600">
-                Monitor, analyze, and respond to customer feedback across all platforms
-              </p>
-
-              {/* Quick Stats Bar */}
-              <div className="flex items-center gap-6 mt-4">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
-                  <MessageSquare className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-700">{totalReviews} Total</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-full">
-                  <Clock className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-700">
-                    {pendingReviews} Pending
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span className="text-sm font-medium text-emerald-700">
-                    {isNaN(avgRating) ? '0.0' : avgRating.toFixed(1)} Avg
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="bg-white/80">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`bg-white/80 ${showFilters ? 'ring-2 ring-blue-500' : ''}`}
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-              <Button
-                onClick={fetchReviews}
-                disabled={loading}
-                size="sm"
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
+    <div className="min-h-screen bg-[#F7F4E9] flex flex-col">
+      {/* Header */}
+      <div className="bg-white border-b border-primary pt-4">
+        <Header title={'Review Management'} />
+        {/* Filters and Search Bar */}
+        <div className="grid grid-cols-1 bg-white md:grid-cols-2 lg:grid-cols-8 gap-4 py-3 px-6">
+          <div className="relative group col-span-2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1B5551]/60 w-4 h-4 group-focus-within:text-[#0B5C58]" />
+            <Input
+              placeholder="Search reviews, customers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-none shadow-none focus:border-[#0B5C58] focus:ring-[#0B5C58]/20 bg-background"
+            />
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="border-none shadow-none hover:bg-background bg-white w-full">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="replied">Replied</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="ignored">Ignored</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterRating} onValueChange={setFilterRating}>
+            <SelectTrigger className="border-none shadow-none bg-white w-full hover:bg-background">
+              <SelectValue placeholder="Filter by rating" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ratings</SelectItem>
+              <SelectItem value="FIVE">⭐⭐⭐⭐⭐ (5 Stars)</SelectItem>
+              <SelectItem value="FOUR">⭐⭐⭐⭐ (4 Stars)</SelectItem>
+              <SelectItem value="THREE">⭐⭐⭐ (3 Stars)</SelectItem>
+              <SelectItem value="TWO">⭐⭐ (2 Stars)</SelectItem>
+              <SelectItem value="ONE">⭐ (1 Star)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterProfile} onValueChange={setFilterProfile}>
+            <SelectTrigger className="border-none shadow-none bg-white w-full hover:bg-background border-s">
+              <SelectValue placeholder="Filter by location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Locations</SelectItem>
+              {uniqueProfiles.map((profile) => (
+                <SelectItem key={profile} value={profile}>
+                  {profile}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchTerm('');
+              setFilterStatus('all');
+              setFilterRating('all');
+              setFilterProfile('all');
+            }}
+            className="border-none shadow-none w-full bg-white hover:bg-red-700 hover:border-red-300 hover:shadow-lg shadow-red-700/70 hover:text-white"
+          >
+            Clear All
+          </Button>
+          <div className="flex w-full items-center gap-3 col-span-2 ms-2 border-s ps-6">
+            <Button
+              variant="outline"
+              className="bg-white hover:shadow-lg shadow-chart-3/70 border-none shadow-none w-[40%]"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button
+              onClick={fetchReviews}
+              disabled={loading}
+              className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:shadow-lg shadow-chart-1/70 text-white w-[50%]"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Enhanced Filters with Slide Animation */}
-        <div
-          className={`transition-all duration-300 pt-6 ease-in-out ${
-            showFilters
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-100 -translate-y-4 pointer-events-none'
-          }`}
-        >
-          <Card className="border-0 shadow-xl shadow-blue-500/10 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="relative group">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-blue-500" />
-                  <Input
-                    placeholder="Search reviews, customers, locations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white/80"
-                  />
-                </div>
-
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="border-slate-200 bg-white/80">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="replied">Replied</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="ignored">Ignored</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterRating} onValueChange={setFilterRating}>
-                  <SelectTrigger className="border-slate-200 bg-white/80">
-                    <SelectValue placeholder="Filter by rating" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Ratings</SelectItem>
-                    <SelectItem value="FIVE">⭐⭐⭐⭐⭐ (5 Stars)</SelectItem>
-                    <SelectItem value="FOUR">⭐⭐⭐⭐ (4 Stars)</SelectItem>
-                    <SelectItem value="THREE">⭐⭐⭐ (3 Stars)</SelectItem>
-                    <SelectItem value="TWO">⭐⭐ (2 Stars)</SelectItem>
-                    <SelectItem value="ONE">⭐ (1 Star)</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterProfile} onValueChange={setFilterProfile}>
-                  <SelectTrigger className="border-slate-200 bg-white/80">
-                    <SelectValue placeholder="Filter by location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    {uniqueProfiles.map((profile) => (
-                      <SelectItem key={profile} value={profile}>
-                        🏢 {profile}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFilterStatus('all');
-                    setFilterRating('all');
-                    setFilterProfile('all');
-                  }}
-                  className="border-slate-200 bg-white/80 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
-                >
-                  Clear All
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Results Summary */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-slate-600 bg-white/60 px-4 py-2 rounded-full backdrop-blur-sm">
-            Showing <span className="font-semibold text-slate-900">{filteredReviews.length}</span>{' '}
-            of <span className="font-semibold text-slate-900">{reviews.length}</span> reviews
+      <div className="flex-1 p-6 space-y-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 items-center">
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white shadow-lg shadow-chart-1/70 bg-chart-1/70 rounded-s-md">
+            <span className="text-base font-medium text-white">{totalReviews} Total</span>
+            <MessageSquare className="w-4 h-4 text-white" />
           </div>
-
-          {filteredReviews.length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <TrendingUp className="w-4 h-4" />
-              <span>Updated {new Date().toLocaleDateString()}</span>
-            </div>
-          )}
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-y-2 border-white shadow-lg shadow-chart-3/70 bg-chart-3/70 rounded-none">
+            <span className="text-base font-medium text-amber-700">{pendingReviews} Pending</span>
+            <Clock className="w-4 h-4 text-amber-600" />
+          </div>
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white shadow-lg shadow-chart-4/70 text-base bg-chart-4/90 rounded-e-md">
+            <span className="font-medium text-emerald-700">
+              {isNaN(avgRating) ? '0.0' : avgRating.toFixed(1)} Avg
+            </span>
+            <Star className="w-4 h-4 text-primary fill-primary" />
+          </div>
         </div>
 
-        {/* Enhanced Reviews Accordion */}
+        {/* Reviews List */}
         {filteredReviews.length > 0 ? (
-          <Accordion type="single" collapsible className="space-y-4">
-            {filteredReviews.map((review, index) => (
-              <AccordionItem
-                key={review.reviewId}
-                value={review.reviewId}
-                className="border-0 shadow-lg shadow-blue-500/5 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300"
-              >
-                <AccordionTrigger className="hover:no-underline px-6 py-5 group">
-                  <div className="flex items-center justify-between w-full mr-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <img
-                          src={
-                            review.reviewer.profilePhotoUrl || '/placeholder.svg?height=48&width=48'
-                          }
-                          alt={review.reviewer.displayName}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-md group-hover:ring-blue-200 transition-all duration-300"
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                          <User className="w-2.5 h-2.5 text-slate-600" />
-                        </div>
-                      </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {(() => {
+              const totalCardInRow = Math.ceil(filteredReviews.length / 4);
+              const row1 = 0 + totalCardInRow;
+              const row2 = row1 + totalCardInRow;
+              const row3 = row2 + totalCardInRow;
+              const row4 = row3 + totalCardInRow;
 
-                      <div className="text-left space-y-1">
-                        <h4 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
-                          {review.reviewer.displayName}
-                        </h4>
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                          <Building2 className="w-3.5 h-3.5" />
-                          <span>{review.businessProfileName}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                          <Calendar className="w-3 h-3" />
-                          <span>
-                            {new Date(review.createTime).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        {getRatingStars(review.starRating)}
-                      </div>
-
-                      <Badge className={`${getStatusColor(review.replyStatus)} border font-medium`}>
-                        {getStatusIcon(review.replyStatus)}
-                        <span className="ml-1 capitalize">{review.replyStatus}</span>
-                      </Badge>
-
-                      {review.sentimentScore && (
-                        <Badge
-                          className={`${getSentimentColor(review.sentimentScore)} font-medium`}
-                        >
-                          {getSentimentLabel(review.sentimentScore)}
-                        </Badge>
-                      )}
-                    </div>
+              return (
+                <>
+                  {/* Column 1 */}
+                  <div className="grid 2xl:gap-3 gap-4">
+                    {filteredReviews.slice(0, row1).map((review) => renderReviewCard(review))}
                   </div>
-                </AccordionTrigger>
 
-                <AccordionContent className="px-6 pb-6">
-                  <div className="space-y-6">
-                    {/* Review Content */}
-                    <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-5 border border-slate-200/50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <MessageSquare className="w-4 h-4 text-slate-600" />
-                        <h5 className="font-semibold text-slate-900">Customer Review</h5>
-                      </div>
-                      <p className="text-slate-700 leading-relaxed text-sm">{review.comment}</p>
-                    </div>
-
-                    {/* Reply Section */}
-                    {review.reviewReply ? (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-l-4 border-blue-400 shadow-sm">
-                        <div className="flex items-center gap-2 mb-3">
-                          <CheckCircle className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-semibold text-blue-800">
-                            {review.reviewReply.aiGenerated
-                              ? '✨ AI Generated Reply'
-                              : '👤 Manual Reply'}
-                          </span>
-                          <span className="text-xs text-slate-500 ml-auto">
-                            {new Date(review.reviewReply.updateTime).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-slate-700 leading-relaxed text-sm">
-                          {review.reviewReply.comment}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 border-l-4 border-amber-400 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-amber-600" />
-                            <span className="text-sm font-semibold text-amber-800">
-                              ⏳ Awaiting Response
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" className="text-xs">
-                              <Eye className="w-3 h-3 mr-1" />
-                              Mark as Read
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-xs"
-                            >
-                              <Sparkles className="w-3 h-3 mr-1" />
-                              Generate Reply
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  {/* Column 2 */}
+                  <div className="grid 2xl:gap-3 gap-4">
+                    {filteredReviews.slice(row1, row2).map((review) => renderReviewCard(review))}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+
+                  {/* Column 3 */}
+                  <div className="grid 2xl:gap-3 gap-4 ">
+                    {filteredReviews.slice(row2, row3).map((review) => renderReviewCard(review))}
+                  </div>
+
+                  {/* Column 4 */}
+                  <div className="grid 2xl:gap-3 gap-4  ">
+                    {filteredReviews.slice(row3, row4).map((review) => renderReviewCard(review))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
         ) : (
-          <Card className="border-0 shadow-xl shadow-blue-500/10 bg-white/80 backdrop-blur-sm">
+          <Card className="border border-[#D1D9D8] bg-white">
             <CardContent className="py-16">
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="w-10 h-10 text-slate-400" />
+                <div className="w-20 h-20 bg-[#F0EDE0] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-10 h-10 text-[#1B5551]/40" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">No reviews found</h3>
-                <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                <h3 className="text-xl font-semibold text-[#1B5551] mb-2">No reviews found</h3>
+                <p className="text-[#1B5551]/70 mb-6 max-w-md mx-auto">
                   Try adjusting your search criteria or filters to find the reviews you&apos;re
                   looking for.
                 </p>
@@ -501,7 +497,7 @@ export default function AllReviewsPage() {
                     setFilterRating('all');
                     setFilterProfile('all');
                   }}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                  className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white"
                 >
                   Clear All Filters
                 </Button>
