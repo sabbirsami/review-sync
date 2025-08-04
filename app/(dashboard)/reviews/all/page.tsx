@@ -12,9 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  AlertCircle,
   Calendar,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -54,7 +52,7 @@ export default function AllReviewsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRating, setFilterRating] = useState('all');
   const [filterProfile, setFilterProfile] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+
   const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
 
@@ -99,32 +97,6 @@ export default function AllReviewsPage() {
     }));
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'replied':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'pending':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'ignored':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'replied':
-        return <CheckCircle2 className="w-3.5 h-3.5" />;
-      case 'pending':
-        return <Clock className="w-3.5 h-3.5" />;
-      case 'ignored':
-        return <AlertCircle className="w-3.5 h-3.5" />;
-      default:
-        return <Clock className="w-3.5 h-3.5" />;
-    }
-  };
-
   const getRatingStars = (rating: string) => {
     const numRating =
       rating === 'ONE'
@@ -142,20 +114,6 @@ export default function AllReviewsPage() {
         className={`w-4 h-4 ${i < numRating ? 'fill-[#FBD686] text-[#FBD686]' : 'text-[#D1D9D8]'}`}
       />
     ));
-  };
-
-  const getSentimentColor = (score?: number) => {
-    if (!score) return 'bg-[#F0EDE0] text-[#1B5551]';
-    if (score >= 0.7) return 'bg-emerald-100 text-emerald-700';
-    if (score >= 0.4) return 'bg-amber-100 text-amber-700';
-    return 'bg-red-100 text-red-700';
-  };
-
-  const getSentimentLabel = (score?: number) => {
-    if (!score) return 'Unknown';
-    if (score >= 0.7) return 'Positive';
-    if (score >= 0.4) return 'Neutral';
-    return 'Negative';
   };
 
   const filteredReviews = reviews.filter((review) => {
@@ -192,7 +150,7 @@ export default function AllReviewsPage() {
   const renderReviewCard = (review: Review) => (
     <Card
       key={review.reviewId}
-      className="border-2 border-[#D1D9D8] bg-white flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+      className="border-none bg-white flex flex-col overflow-hidden rounded-lg shadow-none hover:shadow-xl transition-shadow duration-300"
     >
       <CardContent className="px-6 flex flex-col">
         {/* Header Section */}
@@ -409,7 +367,7 @@ export default function AllReviewsPage() {
           <div className="flex w-full items-center gap-3 col-span-2 ms-2 border-s ps-6">
             <Button
               variant="outline"
-              className="bg-white hover:shadow-lg shadow-chart-3/70 border-none shadow-none w-[40%]"
+              className="bg-chart-3 hover:shadow-lg shadow-chart-3/70 border-none shadow-none w-[40%]"
             >
               <Download className="w-4 h-4 mr-2" />
               Export
@@ -429,15 +387,15 @@ export default function AllReviewsPage() {
       <div className="flex-1 p-6 space-y-6">
         {/* Quick Stats */}
         <div className="grid grid-cols-3 items-center">
-          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white shadow-lg shadow-chart-1/70 bg-chart-1/70 rounded-s-md">
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white hover:shadow-lg hover:shadow-chart-1/70 transition-shadow duration-300 bg-chart-1/70 rounded-s-md">
             <span className="text-base font-medium text-white">{totalReviews} Total</span>
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
-          <div className="flex items-center justify-between gap-2 px-8 py-8 border-y-2 border-white shadow-lg shadow-chart-3/70 bg-chart-3/70 rounded-none">
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-y-2 border-white hover:shadow-lg hover:shadow-chart-3/70 transition-shadow duration-300 bg-chart-3/70 rounded-none">
             <span className="text-base font-medium text-amber-700">{pendingReviews} Pending</span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white shadow-lg shadow-chart-4/70 text-base bg-chart-4/90 rounded-e-md">
+          <div className="flex items-center justify-between gap-2 px-8 py-8 border-2 border-white hover:shadow-lg hover:shadow-chart-4/70 transition-shadow duration-300 text-base bg-chart-4/90 rounded-e-md">
             <span className="font-medium text-emerald-700">
               {isNaN(avgRating) ? '0.0' : avgRating.toFixed(1)} Avg
             </span>

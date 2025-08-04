@@ -208,7 +208,7 @@ export default function ProfessionalDashboard() {
   const renderReviewCard = (review: Review) => (
     <Card
       key={review.reviewId}
-      className="border-2 border-[#D1D9D8] bg-white flex flex-col overflow-hidden rounded-lg  transition-shadow hover:shadow-xl  duration-300"
+      className="border-2 border-primary/80 bg-white flex flex-col overflow-hidden rounded-lg  transition-shadow hover:shadow-xl  duration-300"
     >
       <CardContent className="px-6 flex flex-col">
         {/* Header Section */}
