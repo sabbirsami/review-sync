@@ -200,50 +200,11 @@ export default function ProfessionalDashboard() {
       .toUpperCase();
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'replied':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'pending':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'ignored':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'replied':
-        return <CheckCircle2 className="w-3 h-3" />;
-      case 'pending':
-        return <Clock className="w-3 h-3" />;
-      case 'ignored':
-        return <Eye className="w-3 h-3" />;
-      default:
-        return <AlertCircle className="w-3 h-3" />;
-    }
-  };
-
   // Review card render function from the first snippet
   const renderReviewCard = (review: Review) => (
     <Card
       key={review.reviewId}
-      className="border-2 border-[#D1D9D8] bg-white flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+      className="border-2 border-[#D1D9D8] bg-white flex flex-col overflow-hidden rounded-lg  transition-shadow hover:shadow-xl  duration-300"
     >
       <CardContent className="px-6 flex flex-col">
         {/* Header Section */}
@@ -362,7 +323,7 @@ export default function ProfessionalDashboard() {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] text-white text-xs flex-1 shadow-lg"
+                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] text-white text-xs flex-1 hover:shadow-lg transition-shadow duration-400 "
                     >
                       <Sparkles className="w-3 h-3 mr-1" />
                       Reply
@@ -403,7 +364,7 @@ export default function ProfessionalDashboard() {
           <p className="text-[#1B5551]/70 mb-8 leading-relaxed">{error}</p>
           <button
             onClick={handleRefresh}
-            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white rounded-xl hover:from-[#1B5551] hover:to-[#0B5C58] transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white rounded-xl hover:from-[#1B5551] hover:to-[#0B5C58] transition-all duration-200  hover:shadow-xl font-medium"
           >
             <RefreshCw className="w-5 h-5 mr-2" />
             Try Again
@@ -426,7 +387,7 @@ export default function ProfessionalDashboard() {
           </p>
           <button
             onClick={handleRefresh}
-            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white rounded-xl hover:from-[#1B5551] hover:to-[#0B5C58] transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white rounded-xl hover:from-[#1B5551] hover:to-[#0B5C58] transition-all duration-200  hover:shadow-xl font-medium"
           >
             <RefreshCw className="w-5 h-5 mr-2" />
             Refresh
@@ -473,7 +434,7 @@ export default function ProfessionalDashboard() {
       <div className="flex-1 p-6 space-y-6">
         {/* Metrics Cards */}
         <div className="grid grid-cols-3 gap-6">
-          <div className="border-2 border-white shadow-lg shadow-chart-1/70 bg-chart-1/90 rounded-lg p-6">
+          <div className="border-2 border-white hover:shadow-lg transition-shadow duration-400  shadow-chart-1/70 bg-chart-1/90 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-white">Total Reviews</p>
@@ -504,7 +465,7 @@ export default function ProfessionalDashboard() {
               </div>
             </div>
           </div>
-          <div className="rounded-lg border-white shadow-lg shadow-chart-3/70 bg-chart-3/90 p-6 border-2">
+          <div className="rounded-lg border-white hover:shadow-lg transition-shadow duration-400  shadow-chart-3/70 bg-chart-3/90 p-6 border-2">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-amber-900">Pending Responses</p>
@@ -536,7 +497,7 @@ export default function ProfessionalDashboard() {
               </div>
             </div>
           </div>
-          <div className="rounded-lg p-6 bg-chart-4/90 border-2 border-white shadow-lg shadow-chart-4/70">
+          <div className="rounded-lg p-6 bg-chart-4/90 border-2 border-white hover:shadow-lg transition-shadow duration-400  shadow-chart-4/70">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-chart-1">Average Rating</p>
@@ -563,7 +524,7 @@ export default function ProfessionalDashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-3 gap-6">
           {/* Review Trends Bar Chart */}
-          <div className="col-span-2 bg-white rounded-lg p-6 shadow-lg border-2 border-chart-1/80 shadow-chart-1/15">
+          <div className="col-span-2 bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400  border-2 border-chart-1/80 shadow-chart-1/15">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-[#1B5551]">Review Trends</h3>
               <div className="flex space-x-2">
@@ -631,7 +592,7 @@ export default function ProfessionalDashboard() {
           </div>
 
           {/* Rating Distribution */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border-2 border-chart-1/80 shadow-chart-1/15">
+          <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400  border-2 border-chart-1/80 shadow-chart-1/15">
             <div className="flex items-center justify-between mb-10">
               <h3 className="text-lg font-semibold text-[#1B5551]">Rating Distribution</h3>
               <MoreHorizontal className="w-5 h-5 text-[#1B5551]/40" />
@@ -686,7 +647,7 @@ export default function ProfessionalDashboard() {
         </div>
 
         {/* Response Trends Area Chart */}
-        <div className="bg-white rounded-lg p-6 shadow-lg border-2 border-chart-1/80 shadow-chart-1/15">
+        <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400  border-2 border-chart-1/80 shadow-chart-1/15">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-[#1B5551]">Response Performance</h3>
             <div className="flex space-x-2">
@@ -799,7 +760,7 @@ export default function ProfessionalDashboard() {
           {/* Right Panel */}
           <div className="space-y-6">
             {/* Response Rate */}
-            <div className="bg-white rounded-lg p-6 shadow-lg border-2 border-chart-1/80 shadow-chart-1/15">
+            <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400  border-2 border-chart-1/80 shadow-chart-1/15">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-[#1B5551]">Response Rate</h3>
                 <select className="text-sm border border-[#D1D9D8] rounded px-2 py-1 text-[#1B5551]/70 bg-white focus:outline-none focus:ring-2 focus:ring-[#0B5C58]">
@@ -831,7 +792,7 @@ export default function ProfessionalDashboard() {
 
             {/* Location Performance */}
             {profileStats.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-lg border-2 border-chart-1/80 shadow-chart-1/15">
+              <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400  border-2 border-chart-1/80 shadow-chart-1/15">
                 <h3 className="text-lg font-semibold text-[#1B5551] mb-2">Location Performance</h3>
                 <p className="text-sm text-[#1B5551]/70 mb-4">Compare metrics across locations</p>
                 <div className="flex items-center space-x-2 mb-4">
