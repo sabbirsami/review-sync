@@ -111,7 +111,7 @@ const ChatSheet = () => {
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:w-[580px] p-0 flex flex-col">
+      <SheetContent className="w-full sm:w-[500px] p-0 flex flex-col">
         <SheetHeader className="border-b border-[#D1D9D8] p-4 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
