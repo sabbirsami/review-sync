@@ -101,7 +101,9 @@ export default function ProfessionalDashboard() {
   const fetchData = async () => {
     try {
       setError(null);
-      const statsResponse = await fetch('/api/stats');
+      const statsResponse = await fetch('/api/stats', {
+        cache: 'force-cache', // or 'no-store' or 'revalidate'
+      });
       if (!statsResponse.ok) {
         throw new Error(`Failed to fetch stats: ${statsResponse.status}`);
       }
@@ -111,7 +113,9 @@ export default function ProfessionalDashboard() {
         setProfileStats(statsData.profileStats || []);
       }
 
-      const reviewsResponse = await fetch('/api/reviews?limit=4');
+      const reviewsResponse = await fetch('/api/reviews?limit=4', {
+        cache: 'force-cache', // or 'no-store' or 'revalidate'
+      });
       if (!reviewsResponse.ok) {
         throw new Error(`Failed to fetch reviews: ${reviewsResponse.status}`);
       }
