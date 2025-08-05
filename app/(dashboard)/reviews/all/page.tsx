@@ -22,38 +22,42 @@ interface Review {
   };
   replyStatus: 'pending' | 'replied' | 'ignored';
   sentimentScore?: number;
-  name: string; // Add the required name property
+  name: string;
 }
 
-export default async function ReviewMainPage({
-  searchParams,
-}: {
-  searchParams: {
+interface PageProps {
+  searchParams: Promise<{
     search?: string;
     status?: string;
     rating?: string;
     profile?: string;
-  };
-}) {
-  const searchTerm = searchParams.search || '';
-  const filterStatus = searchParams.status || 'all';
-  const filterRating = searchParams.rating || 'all';
-  const filterProfile = searchParams.profile || 'all';
+  }>;
+}
+
+export default async function ReviewMainPage({ searchParams }: PageProps) {
+  // Await the searchParams Promise
+  const params = await searchParams;
+
+  const searchTerm = params.search || '';
+  const filterStatus = params.status || 'all';
+  const filterRating = params.rating || 'all';
+  const filterProfile = params.profile || 'all';
 
   let reviews: Review[] = [];
   const loading = false;
 
   try {
-    const params = new URLSearchParams({
+    const queryParams = new URLSearchParams({
       limit: '100',
       ...(filterStatus !== 'all' && { status: filterStatus }),
       ...(filterRating !== 'all' && { rating: filterRating }),
       ...(filterProfile !== 'all' && { profileId: filterProfile }),
     });
 
-    const response = await fetch(`http://localhost:3000/api/reviews?${params}`, {
+    const response = await fetch(`http://localhost:3000/api/reviews?${queryParams}`, {
       next: { revalidate: 60 },
     });
+
     const data = await response.json();
     if (data.reviews) {
       reviews = data.reviews;
@@ -78,7 +82,6 @@ export default async function ReviewMainPage({
           uniqueProfiles={Array.from(new Set(reviews.map((review) => review.businessProfileName)))}
         />
       </div>
-
       <div className="flex-1 p-6 space-y-6">
         <ReviewStats
           reviews={reviews}
