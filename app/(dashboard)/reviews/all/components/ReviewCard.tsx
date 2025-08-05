@@ -41,7 +41,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
                 <Image
                   src={review.reviewer.profilePhotoUrl || '/placeholder.svg'}
-                  alt={review.reviewer.displayName}
+                  alt={review.reviewer.displayName || 'Reviewer'}
                   width={32}
                   height={32}
                   className="object-cover"
