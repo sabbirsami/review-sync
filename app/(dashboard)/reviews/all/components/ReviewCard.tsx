@@ -40,8 +40,8 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
                 <Image
-                  src={review.reviewer.profilePhotoUrl || '/placeholder.svg'}
-                  alt={review.reviewer.displayName || 'Reviewer'}
+                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg'}
+                  alt={review?.reviewer?.displayName || 'Reviewer'}
                   width={32}
                   height={32}
                   className="object-cover"
@@ -53,13 +53,13 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
               <div className="space-y-1">
                 <h4 className="font-semibold text-foreground text-sm">
                   {review?.reviewer?.displayName?.length > 20
-                    ? `${review.reviewer.displayName.slice(0, 20)}...`
-                    : review.reviewer.displayName}
+                    ? `${review?.reviewer?.displayName.slice(0, 20)}...`
+                    : review?.reviewer?.displayName}
                 </h4>
                 <div className="flex items-center gap-2 -mt-1 text-xs text-foreground/60">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    {new Date(review.createTime).toLocaleDateString('en-US', {
+                    {new Date(review?.createTime).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -68,7 +68,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-0.5">{getRatingStars(review.starRating)}</div>
+            <div className="flex items-center gap-0.5">{getRatingStars(review?.starRating)}</div>
           </div>
         </div>
         {/* Review Content */}
@@ -80,9 +80,9 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                   isExpanded ? '' : 'line-clamp-3'
                 }`}
               >
-                {review.comment ? review.comment : 'No comment'}
+                {review?.comment ? review?.comment : 'No comment'}
               </p>
-              {review?.comment && review.comment.length > 150 && (
+              {review?.comment && review?.comment?.length > 150 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="mt-2 text-sm text-primary font-medium flex items-center hover:text-foreground transition-colors"
@@ -104,7 +104,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
           </div>
           {/* Action Section */}
           <div className="pt-2 text-xs border-t border-background">
-            {review.reviewReply ? (
+            {review?.reviewReply ? (
               <div className="space-y-2">
                 <button
                   onClick={() => setIsReplyExpanded(!isReplyExpanded)}
@@ -112,7 +112,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                 >
                   <div className="flex items-center justify-between transition-colars">
                     <div className="flex items-center text-xs text-primary font-medium">
-                      <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
+                      <span>{review?.reviewReply?.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
                     {isReplyExpanded ? (
                       <ChevronUp className="w-4 h-4 text-primary" />
@@ -125,13 +125,13 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                   <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-md p-4 border-l-4 border-primary backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs text-foreground/60">
-                        {new Date(review.reviewReply.updateTime).toLocaleDateString()}
+                        {new Date(review?.reviewReply?.updateTime).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="text-foreground leading-relaxed text-xs">
-                      {review.reviewReply.comment.length > 100
-                        ? `${review.reviewReply.comment.slice(0, 100)}...`
-                        : review.reviewReply.comment}
+                      {review?.reviewReply?.comment?.length > 100
+                        ? `${review?.reviewReply?.comment?.slice(0, 100)}...`
+                        : review?.reviewReply?.comment}
                     </p>
                   </div>
                 )}
