@@ -1,3 +1,4 @@
+'use client';
 import { BarChart3 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -36,7 +37,7 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
   return (
     <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400 border-2 border-chart-1/80 shadow-chart-1/15">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-[#1B5551]">Review Trends</h3>
+        <h3 className="text-lg font-semibold text-primary">Review Trends</h3>
         <div className="flex space-x-2">
           {['12 Months', '3 Months', '30 Days', '7 Days'].map((period) => (
             <a
@@ -44,8 +45,8 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
               href={`?timeframe=${period}`}
               className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
                 selectedTimeframe === period
-                  ? 'bg-[#0B5C58] text-white shadow-md'
-                  : 'text-[#1B5551]/70 hover:bg-[#F0EDE0] hover:text-[#1B5551]'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-primary/70 hover:bg-[#F0EDE0] hover:text-primary'
               }`}
             >
               {period}
@@ -85,16 +86,16 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
                   color: '#1B5551',
                 }}
               />
-              <Bar dataKey="count" fill="#0B5C58" radius={[4, 4, 0, 0]} name="Reviews" />
+              <Bar dataKey="count" fill="currentColor" radius={[4, 4, 0, 0]} name="Reviews" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-[300px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-[#1B5551]/60">
+        <div className="h-[300px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-primary/60">
           <div className="text-center">
-            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-[#1B5551]/30" />
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-primary/30" />
             <p className="text-base font-medium">No trend data available</p>
-            <p className="text-xs text-[#1B5551]/40 mt-1">
+            <p className="text-xs text-primary/40 mt-1">
               Data will appear as reviews are collected
             </p>
           </div>

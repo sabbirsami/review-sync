@@ -102,42 +102,42 @@ const Sidebar: React.FC = () => {
     {
       label: 'Reviews',
       icon: ReviewsIcon,
-      badge: '24',
+      // badge: '24',
       subRoutes: [
         { path: '/reviews/all', label: 'All Reviews', badge: '74' },
-        { path: '/reviews/pending', label: 'Pending Replies', badge: '12' },
-        { path: '/reviews/replied', label: 'Replied', badge: '62' },
-        { path: '/reviews/negative', label: 'Negative Reviews', badge: '3' },
+        // { path: '/reviews/pending', label: 'Pending Replies', badge: '12' },
+        // { path: '/reviews/replied', label: 'Replied', badge: '62' },
+        // { path: '/reviews/negative', label: 'Negative Reviews', badge: '3' },
       ],
     },
-    {
-      label: 'Business Profiles',
-      icon: BusinessIcon,
-      subRoutes: [
-        { path: '/business-profiles/1', label: 'Main Branch', badge: '32' },
-        { path: '/business-profiles/2', label: 'Downtown', badge: '28' },
-        { path: '/business-profiles/3', label: 'Mall Branch', badge: '14' },
-      ],
-    },
-    {
-      label: 'Analytics',
-      icon: AnalyticsIcon,
-      subRoutes: [
-        { path: '/analytics/response-rate', label: 'Response Rate' },
-        { path: '/analytics/rating-trends', label: 'Rating Trends' },
-        { path: '/analytics/sentiment', label: 'Sentiment Analysis' },
-      ],
-    },
-    {
-      label: 'Automation',
-      icon: AutomationIcon,
-      badge: 'NEW',
-      subRoutes: [
-        { path: '/automation/workflows', label: 'AI Workflows' },
-        { path: '/automation/templates', label: 'Reply Templates' },
-        { path: '/automation/settings', label: 'Auto-Reply Settings' },
-      ],
-    },
+    // {
+    //   label: 'Business Profiles',
+    //   icon: BusinessIcon,
+    //   subRoutes: [
+    //     { path: '/business-profiles/1', label: 'Main Branch', badge: '32' },
+    //     { path: '/business-profiles/2', label: 'Downtown', badge: '28' },
+    //     { path: '/business-profiles/3', label: 'Mall Branch', badge: '14' },
+    //   ],
+    // },
+    // {
+    //   label: 'Analytics',
+    //   icon: AnalyticsIcon,
+    //   subRoutes: [
+    //     { path: '/analytics/response-rate', label: 'Response Rate' },
+    //     { path: '/analytics/rating-trends', label: 'Rating Trends' },
+    //     { path: '/analytics/sentiment', label: 'Sentiment Analysis' },
+    //   ],
+    // },
+    // {
+    //   label: 'Automation',
+    //   icon: AutomationIcon,
+    //   badge: 'NEW',
+    //   subRoutes: [
+    //     { path: '/automation/workflows', label: 'AI Workflows' },
+    //     { path: '/automation/templates', label: 'Reply Templates' },
+    //     { path: '/automation/settings', label: 'Auto-Reply Settings' },
+    //   ],
+    // },
   ];
 
   const bottomNavItems: NavItem[] = [

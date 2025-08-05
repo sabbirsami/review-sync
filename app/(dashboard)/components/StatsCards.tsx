@@ -84,7 +84,7 @@ export default function StatsCards({ dashboardStats }: StatsCardsProps) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-chart-1">Average Rating</p>
-            <p className="text-3xl font-bold text-[#1B5551] mt-1">
+            <p className="text-3xl font-bold text-foreground mt-1">
               {dashboardStats.averageRating.toFixed(1)}
             </p>
             <div className="flex items-center mt-2">
