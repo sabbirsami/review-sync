@@ -1,16 +1,19 @@
 'use client';
 
+import SearchIcon from '@/components/icons/SearchIcon';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useState } from 'react';
+import SettingsPanel from '../SettingsPanel';
 
 // Enhanced Icons
 const DashboardIcon = () => (
@@ -73,25 +76,20 @@ const HelpIcon = () => (
   </svg>
 );
 
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.35-4.35" />
-  </svg>
-);
-
 interface NavItem {
   path?: string;
   label: string;
   icon: React.ComponentType;
   subRoutes?: { path: string; label: string; badge?: string | number }[];
   badge?: string | number;
+  isSheet?: boolean;
 }
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [openItem, setOpenItem] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const menuItems: NavItem[] = [
     {
@@ -142,7 +140,7 @@ const Sidebar: React.FC = () => {
 
   const bottomNavItems: NavItem[] = [
     { path: '/help', label: 'Help Center', icon: HelpIcon },
-    { path: '/settings', label: 'Settings', icon: SettingsIcon },
+    { label: 'Settings', icon: SettingsIcon, isSheet: true },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -314,7 +312,36 @@ const Sidebar: React.FC = () => {
         <nav className="space-y-1">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
-            const active = isActive(item.path!);
+            const active = item.path ? isActive(item.path) : false;
+
+            if (item.isSheet) {
+              return (
+                <Sheet key={item.label} open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                  <SheetTrigger asChild>
+                    <button
+                      className={`group hover:bg-sidebar-muted hover:text-sidebar-foreground flex cursor-pointer items-center w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        active
+                          ? 'bg-sidebar-muted text-sidebar-foreground border border-sidebar-border'
+                          : 'text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground'
+                      }`}
+                    >
+                      <span
+                        className={`group-hover:text-sidebar-accent transition-colors ${
+                          active ? 'text-sidebar-primary' : ''
+                        }`}
+                      >
+                        <Icon />
+                      </span>
+                      <span className="ml-3">{item.label}</span>
+                    </button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[400px] sm:w-[540px] bg-card">
+                    <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+                  </SheetContent>
+                </Sheet>
+              );
+            }
+
             return (
               <Link
                 key={item.label}
