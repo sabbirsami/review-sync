@@ -53,8 +53,8 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
       ...(filterRating !== 'all' && { rating: filterRating }),
       ...(filterProfile !== 'all' && { profileId: filterProfile }),
     });
-
-    const response = await fetch(`http://localhost:3000/api/reviews?${queryParams}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const response = await fetch(`${apiUrl}/api/reviews?${queryParams}`, {
       next: { revalidate: 60 },
     });
 
