@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ReviewDocument } from '@/types/review';
 import { Calendar, ChevronDown, ChevronUp, Clock, Eye, Sparkles, Star } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 
 export default function ReviewCard({ review }: { review: ReviewDocument }) {
@@ -37,11 +38,16 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
         <div className="flex-shrink-0 mb-4">
           <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <img
+              <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                <Image
                   src={review.reviewer.profilePhotoUrl || '/placeholder.svg'}
                   alt={review.reviewer.displayName}
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-md"
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                  }}
                 />
               </div>
               <div className="space-y-1">

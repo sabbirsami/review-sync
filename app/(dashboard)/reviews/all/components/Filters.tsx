@@ -1,5 +1,4 @@
 'use client';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { exportToPdf } from '@/lib/generatePdf';
+
 import { Download, RefreshCw, Search } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
@@ -41,6 +42,24 @@ export default function Filters({
 
   const handleFilterChange = (name: string, value: string) => {
     router.push(pathname + '?' + createQueryString(name, value));
+  };
+  const handleExport = async () => {
+    // Wait for any potential state updates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Try both possible container IDs
+    const container =
+      document.getElementById('reviews-container') || document.querySelector('.reviews-container');
+
+    if (!container) {
+      console.error('Export container not found');
+      return;
+    }
+
+    exportToPdf(
+      container.id || 'reviews-container',
+      `reviews-export-${new Date().toISOString().split('T')[0]}`,
+    );
   };
 
   const handleClearAll = () => {
@@ -109,6 +128,7 @@ export default function Filters({
 
       <div className="flex w-full items-center gap-3 col-span-2 ms-2 border-s ps-6">
         <Button
+          onClick={handleExport}
           variant="outline"
           className="bg-chart-3 hover:shadow-lg shadow-chart-3/70 border-none shadow-none w-[40%]"
         >
