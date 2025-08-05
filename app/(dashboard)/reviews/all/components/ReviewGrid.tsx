@@ -34,14 +34,14 @@ export default function ReviewGrid({
         <CardContent className="py-16">
           <div className="text-center">
             <div className="w-20 h-20 bg-[#F0EDE0] rounded-full flex items-center justify-center mx-auto mb-6">
-              <SearchIcon className="w-10 h-10 text-[#1B5551]/40" />
+              <SearchIcon className="w-10 h-10 text-foreground/40" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1B5551] mb-2">No reviews found</h3>
-            <p className="text-[#1B5551]/70 mb-6 max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-foreground mb-2">No reviews found</h3>
+            <p className="text-foreground/70 mb-6 max-w-md mx-auto">
               Try adjusting your search criteria or filters to find the reviews you&apos;re looking
               for.
             </p>
-            <Button className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] text-white">
+            <Button className="bg-gradient-to-r from-primary to-foreground text-white">
               Clear All Filters
             </Button>
           </div>

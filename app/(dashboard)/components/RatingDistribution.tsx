@@ -11,7 +11,7 @@ export default function RatingDistribution({ dashboardStats }: RatingDistributio
   return (
     <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400 border-2 border-chart-1/80 shadow-chart-1/15">
       <div className="flex items-center justify-between mb-10">
-        <h3 className="text-lg font-semibold text-[#1B5551]">Rating Distribution</h3>
+        <h3 className="text-lg font-semibold text-primary">Rating Distribution</h3>
       </div>
 
       {dashboardStats.ratingDistribution.length > 0 ? (
@@ -27,19 +27,19 @@ export default function RatingDistribution({ dashboardStats }: RatingDistributio
                 <div key={item.rating} className="group">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-[#1B5551] w-4">{item.rating}</span>
+                      <span className="text-sm font-bold text-primary w-4">{item.rating}</span>
                       <Star className="w-4 h-4 fill-[#FBD686] text-[#FBD686]" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#1B5551]">{item.count}</span>
-                      <span className="text-xs text-[#1B5551]/60 font-medium">
+                      <span className="text-sm font-semibold text-primary">{item.count}</span>
+                      <span className="text-xs text-primary/60 font-medium">
                         ({percentage.toFixed(1)}%)
                       </span>
                     </div>
                   </div>
-                  <div className="w-full bg-[#F0EDE0] rounded-md h-10">
+                  <div className="w-full bg-[#F0EDE0] rounded-sm h-4.5">
                     <div
-                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] h-10 rounded-md transition-all duration-700"
+                      className="bg-gradient-to-r from-primary to-primary h-4.5 rounded-sm transition-all duration-700"
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
@@ -48,11 +48,11 @@ export default function RatingDistribution({ dashboardStats }: RatingDistributio
             })}
         </div>
       ) : (
-        <div className="h-[200px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-[#1B5551]/60">
+        <div className="h-[200px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-primary/60">
           <div className="text-center">
-            <Star className="w-12 h-12 mx-auto mb-4 text-[#1B5551]/30" />
+            <Star className="w-12 h-12 mx-auto mb-4 text-primary/30" />
             <p className="text-base font-medium">No rating data</p>
-            <p className="text-xs text-[#1B5551]/40 mt-1">Ratings will appear here</p>
+            <p className="text-xs text-primary/40 mt-1">Ratings will appear here</p>
           </div>
         </div>
       )}

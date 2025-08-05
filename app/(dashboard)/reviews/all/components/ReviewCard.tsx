@@ -51,12 +51,12 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                 />
               </div>
               <div className="space-y-1">
-                <h4 className="font-semibold text-[#1B5551] text-sm">
+                <h4 className="font-semibold text-foreground text-sm">
                   {review?.reviewer?.displayName?.length > 20
                     ? `${review.reviewer.displayName.slice(0, 20)}...`
                     : review.reviewer.displayName}
                 </h4>
-                <div className="flex items-center gap-2 -mt-1 text-xs text-[#1B5551]/60">
+                <div className="flex items-center gap-2 -mt-1 text-xs text-foreground/60">
                   <Calendar className="w-3 h-3" />
                   <span>
                     {new Date(review.createTime).toLocaleDateString('en-US', {
@@ -76,7 +76,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
           <div className="bg-[#F0EDE0]/0 rounded-sm mb-3 backdrop-blur-sm">
             <div className="relative">
               <p
-                className={`text-[#1B5551] leading-relaxed text-sm transition-all duration-300 ${
+                className={`text-foreground leading-relaxed text-sm transition-all duration-300 ${
                   isExpanded ? '' : 'line-clamp-3'
                 }`}
               >
@@ -85,7 +85,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
               {review?.comment && review.comment.length > 150 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="mt-2 text-sm text-[#0B5C58] font-medium flex items-center hover:text-[#1B5551] transition-colors"
+                  className="mt-2 text-sm text-primary font-medium flex items-center hover:text-foreground transition-colors"
                 >
                   {isExpanded ? (
                     <>
@@ -111,24 +111,24 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                   className="w-full text-left group"
                 >
                   <div className="flex items-center justify-between transition-colars">
-                    <div className="flex items-center text-xs text-[#0B5C58] font-medium">
+                    <div className="flex items-center text-xs text-primary font-medium">
                       <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
                     {isReplyExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-[#0B5C58]" />
+                      <ChevronUp className="w-4 h-4 text-primary" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-[#0B5C58]" />
+                      <ChevronDown className="w-4 h-4 text-primary" />
                     )}
                   </div>
                 </button>
                 {isReplyExpanded && (
-                  <div className="bg-gradient-to-br from-[#0B5C58]/5 to-[#0B5C58]/10 rounded-md p-4 border-l-4 border-[#0B5C58] backdrop-blur-sm">
+                  <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-md p-4 border-l-4 border-primary backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs text-[#1B5551]/60">
+                      <span className="text-xs text-foreground/60">
                         {new Date(review.reviewReply.updateTime).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-[#1B5551] leading-relaxed text-xs">
+                    <p className="text-foreground leading-relaxed text-xs">
                       {review.reviewReply.comment.length > 100
                         ? `${review.reviewReply.comment.slice(0, 100)}...`
                         : review.reviewReply.comment}
@@ -154,7 +154,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] text-white text-xs flex-1 shadow-lg"
+                      className="bg-gradient-to-r from-primary to-foreground hover:from-foreground hover:to-primary text-white text-xs flex-1 shadow-lg"
                     >
                       <Sparkles className="w-3 h-3 mr-1" />
                       Reply

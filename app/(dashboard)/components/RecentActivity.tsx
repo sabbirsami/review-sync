@@ -82,7 +82,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
 
   const renderReviewCard = (review: Review) => (
     <Card
-      key={review.reviewId}
+      key={review?.reviewId}
       className="border-2 border-primary/80 bg-white flex flex-col overflow-hidden rounded-lg transition-shadow hover:shadow-xl duration-300"
     >
       <CardContent className="px-6 flex flex-col">
@@ -92,8 +92,8 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
                 <Image
-                  src={review.reviewer.profilePhotoUrl || '/placeholder.svg'}
-                  alt={review.reviewer.displayName}
+                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg'}
+                  alt={review?.reviewer?.displayName}
                   width={32}
                   height={32}
                   className="object-cover"
@@ -103,15 +103,15 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
                 />
               </div>
               <div className="space-y-1">
-                <h4 className="font-semibold text-[#1B5551] text-sm grow">
-                  {review.reviewer.displayName.length > 20
-                    ? `${review.reviewer.displayName.slice(0, 20)}...`
-                    : review.reviewer.displayName}
+                <h4 className="font-semibold text-foreground text-sm grow">
+                  {review?.reviewer?.displayName?.length > 20
+                    ? `${review?.reviewer?.displayName?.slice(0, 20)}...`
+                    : review?.reviewer?.displayName}
                 </h4>
-                <div className="flex items-center gap-2 -mt-1 text-xs text-[#1B5551]/60">
+                <div className="flex items-center gap-2 -mt-1 text-xs text-foreground/60">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    {new Date(review.createTime).toLocaleDateString('en-US', {
+                    {new Date(review?.createTime).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -120,7 +120,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-0.5">{getRatingStars(review.starRating)}</div>
+            <div className="flex items-center gap-0.5">{getRatingStars(review?.starRating)}</div>
           </div>
         </div>
         {/* Review Content */}
@@ -128,18 +128,18 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
           <div className="bg-[#F0EDE0]/0 rounded-sm mb-3 backdrop-blur-sm">
             <div className="relative">
               <p
-                className={`text-[#1B5551] leading-relaxed text-sm transition-all duration-300 ${
-                  expandedReviews[review.reviewId] ? '' : 'line-clamp-3'
+                className={`text-foreground leading-relaxed text-sm transition-all duration-300 ${
+                  expandedReviews[review?.reviewId] ? '' : 'line-clamp-3'
                 }`}
               >
-                {review.comment ? review.comment : 'No comment'}
+                {review?.comment ? review?.comment : 'No comment'}
               </p>
-              {review?.comment && review.comment.length > 150 && (
+              {review?.comment && review?.comment?.length > 150 && (
                 <button
-                  onClick={() => toggleReviewExpand(review.reviewId)}
-                  className="mt-2 text-sm text-[#0B5C58] font-medium flex items-center hover:text-[#1B5551] transition-colors"
+                  onClick={() => toggleReviewExpand(review?.reviewId)}
+                  className="mt-2 text-sm text-primary font-medium flex items-center hover:text-foreground transition-colors"
                 >
-                  {expandedReviews[review.reviewId] ? (
+                  {expandedReviews[review?.reviewId] ? (
                     <>
                       <span>Show less</span>
                       <ChevronUp className="w-4 h-4 ml-1" />
@@ -156,34 +156,34 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
           </div>
           {/* Action Section */}
           <div className="pt-2 text-xs border-t border-background">
-            {review.reviewReply ? (
+            {review?.reviewReply ? (
               <div className="space-y-2">
                 <button
-                  onClick={() => toggleReplyExpand(review.reviewId)}
+                  onClick={() => toggleReplyExpand(review?.reviewId)}
                   className="w-full text-left group"
                 >
                   <div className="flex items-center justify-between transition-colors">
-                    <div className="flex items-center text-xs text-[#0B5C58] font-medium">
-                      <span>{review.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
+                    <div className="flex items-center text-xs text-primary font-medium">
+                      <span>{review?.reviewReply.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
-                    {expandedReplies[review.reviewId] ? (
-                      <ChevronUp className="w-4 h-4 text-[#0B5C58]" />
+                    {expandedReplies[review?.reviewId] ? (
+                      <ChevronUp className="w-4 h-4 text-primary" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-[#0B5C58]" />
+                      <ChevronDown className="w-4 h-4 text-primary" />
                     )}
                   </div>
                 </button>
-                {expandedReplies[review.reviewId] && (
-                  <div className="bg-gradient-to-br from-[#0B5C58]/5 to-[#0B5C58]/10 rounded-md p-4 border-l-4 border-[#0B5C58] backdrop-blur-sm">
+                {expandedReplies[review?.reviewId] && (
+                  <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-md p-4 border-l-4 border-primary backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs text-[#1B5551]/60">
-                        {new Date(review.reviewReply.updateTime).toLocaleDateString()}
+                      <span className="text-xs text-foreground/60">
+                        {new Date(review?.reviewReply.updateTime).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-[#1B5551] leading-relaxed text-xs">
-                      {review.reviewReply.comment.length > 100
-                        ? `${review.reviewReply.comment.slice(0, 100)}...`
-                        : review.reviewReply.comment}
+                    <p className="text-foreground leading-relaxed text-xs">
+                      {review?.reviewReply?.comment?.length > 100
+                        ? `${review?.reviewReply?.comment.slice(0, 100)}...`
+                        : review?.reviewReply?.comment}
                     </p>
                   </div>
                 )}
@@ -206,7 +206,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:from-[#1B5551] hover:to-[#0B5C58] text-white text-xs flex-1 hover:shadow-lg transition-shadow duration-400"
+                      className="bg-gradient-to-r from-primary to-foreground hover:from-foreground hover:to-primary text-white text-xs flex-1 hover:shadow-lg transition-shadow duration-400"
                     >
                       <Sparkles className="w-3 h-3 mr-1" />
                       Reply
@@ -224,10 +224,10 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
   return (
     <>
       <div className="flex items-center justify-between mb-4 px-2">
-        <h3 className="text-lg font-semibold text-[#1B5551]">Recent Activity</h3>
+        <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
         <div className="flex space-x-2">
-          <Download className="w-5 h-5 text-[#1B5551]/40 cursor-pointer hover:text-[#1B5551]" />
-          <MoreHorizontal className="w-5 h-5 text-[#1B5551]/40 cursor-pointer hover:text-[#1B5551]" />
+          <Download className="w-5 h-5 text-foreground/40 cursor-pointer hover:text-foreground" />
+          <MoreHorizontal className="w-5 h-5 text-foreground/40 cursor-pointer hover:text-foreground" />
         </div>
       </div>
 
@@ -246,11 +246,11 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
           </div>
         </div>
       ) : (
-        <div className="h-[200px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-[#1B5551]/60">
+        <div className="h-[200px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-foreground/60">
           <div className="text-center">
-            <MessageCircle className="w-12 h-12 mx-auto mb-4 text-[#1B5551]/30" />
+            <MessageCircle className="w-12 h-12 mx-auto mb-4 text-foreground/30" />
             <p className="text-base font-medium">No recent reviews</p>
-            <p className="text-xs text-[#1B5551]/40 mt-1">Reviews will appear here</p>
+            <p className="text-xs text-foreground/40 mt-1">Reviews will appear here</p>
           </div>
         </div>
       )}

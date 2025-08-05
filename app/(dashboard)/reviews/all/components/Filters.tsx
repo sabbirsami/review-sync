@@ -69,12 +69,12 @@ export default function Filters({
   return (
     <div className="grid grid-cols-1 bg-white md:grid-cols-2 lg:grid-cols-8 gap-4 py-3 px-6">
       <div className="relative group col-span-2">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1B5551]/60 w-4 h-4 group-focus-within:text-[#0B5C58]" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/60 w-4 h-4 group-focus-within:text-primary" />
         <Input
           placeholder="Search reviews, customers..."
           value={searchTerm}
           onChange={(e) => handleFilterChange('search', e.target.value)}
-          className="pl-10 border-none shadow-none focus:border-[#0B5C58] focus:ring-[#0B5C58]/20 bg-background"
+          className="pl-10 border-none shadow-none focus:border-primary focus:ring-primary/20 bg-background"
         />
       </div>
 
@@ -137,7 +137,7 @@ export default function Filters({
         </Button>
         <Button
           onClick={() => router.refresh()}
-          className="bg-gradient-to-r from-[#0B5C58] to-[#1B5551] hover:shadow-lg shadow-chart-1/70 text-white w-[50%]"
+          className="bg-gradient-to-r from-primary to-foreground hover:shadow-lg shadow-chart-1/70 text-white w-[50%]"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
