@@ -31,7 +31,6 @@ const DashboardIcon = () => (
     <rect x="3" y="14" width="7" height="7" rx="1" />
   </svg>
 );
-
 const ReviewsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -40,7 +39,6 @@ const ReviewsIcon = () => (
     <path d="M12 17v-2" />
   </svg>
 );
-
 const AnalyticsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M3 3v18h18" />
@@ -51,14 +49,12 @@ const AnalyticsIcon = () => (
     <circle cx="18" cy="7" r="1" />
   </svg>
 );
-
 const SettingsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
-
 const BusinessIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -66,7 +62,6 @@ const BusinessIcon = () => (
     <path d="M9 7h6" />
   </svg>
 );
-
 const AutomationIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect x="2" y="4" width="20" height="13" rx="2" />
@@ -74,7 +69,6 @@ const AutomationIcon = () => (
     <path d="M13 15h3" />
   </svg>
 );
-
 const HelpIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="10" />
@@ -82,7 +76,6 @@ const HelpIcon = () => (
     <circle cx="12" cy="17" r="1" fill="currentColor" />
   </svg>
 );
-
 const ChevronDownIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <polyline points="6 9 12 15 18 9" />
@@ -131,7 +124,6 @@ const Sidebar: React.FC = () => {
       setIsLoadingProfiles(true);
       const response = await fetch('/api/stats');
       const data = await response.json();
-
       if (data.profileStats && Array.isArray(data.profileStats)) {
         setBusinessProfiles(data.profileStats);
       }
@@ -144,16 +136,13 @@ const Sidebar: React.FC = () => {
 
   const handleProfileChange = (profileId: string) => {
     setSelectedProfile(profileId);
-
     // Update URL with the selected profileId
     const currentUrl = new URL(window.location.href);
-
     if (profileId === 'all') {
       currentUrl.searchParams.delete('profileId');
     } else {
       currentUrl.searchParams.set('profileId', profileId);
     }
-
     // Use router.replace to update URL without page reload
     router.replace(`${pathname}${currentUrl.search}`);
   };
@@ -371,19 +360,19 @@ const Sidebar: React.FC = () => {
 
       {/* Enhanced Bottom Section */}
       <div className="border-t border-sidebar-border  ">
-        <div className="mb-4 px-4 border-b pb-1.5  ">
+        <div className="mb-2 px-1 shadow-lg shadow-primary/5 border-primary/40 border mt-4 mx-4 pb-0.5 rounded-2xl ">
           {/* Business Profile Selector */}
+          <label className="text-xs  px-3 pt-2.5 -mb-1   text-sidebar-foreground/70  block">
+            Select Business Profile
+          </label>
           <div className=" ">
-            <label className="text-xs  px-3 pt-3   text-sidebar-foreground/70  block">
-              Select Business Profile
-            </label>
             <Select
               value={selectedProfile}
               onValueChange={handleProfileChange}
               disabled={isLoadingProfiles}
             >
               <SelectTrigger className="!bg-sidebar shadow-none w-full bg-sidebar-muted border-0 border-sidebar-border text-sidebar-foreground">
-                <div className="flex items-center gap-2 text-lg ¡font-bold">
+                <div className="flex items-center gap-2 text-sidebar-foreground text-lg font-semibold">
                   <SelectValue className="text-wrap ">
                     {isLoadingProfiles ? 'Loading...' : getSelectedProfileName()}
                   </SelectValue>
@@ -430,7 +419,6 @@ const Sidebar: React.FC = () => {
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const active = item.path ? isActive(item.path) : false;
-
             if (item.isSheet) {
               return (
                 <Sheet key={item.label} open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
@@ -458,7 +446,6 @@ const Sidebar: React.FC = () => {
                 </Sheet>
               );
             }
-
             return (
               <Link
                 key={item.label}
@@ -483,7 +470,7 @@ const Sidebar: React.FC = () => {
         </nav>
 
         {/* Version Info */}
-        <div className="mt-4 text-center">
+        <div className="mt-4 mb-1 text-center">
           <div className="text-xs text-sidebar-muted-foreground">v2.1.0</div>
         </div>
       </div>

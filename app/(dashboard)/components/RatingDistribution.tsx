@@ -13,7 +13,6 @@ export default function RatingDistribution({ dashboardStats }: RatingDistributio
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-lg font-semibold text-primary">Rating Distribution</h3>
       </div>
-
       {dashboardStats.ratingDistribution.length > 0 ? (
         <div className="space-y-4">
           {dashboardStats.ratingDistribution
