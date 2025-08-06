@@ -75,7 +75,7 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4E9] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <div className="bg-white border-b border-primary pt-4">
         <Header title={'Review Management'} />
         <Filters

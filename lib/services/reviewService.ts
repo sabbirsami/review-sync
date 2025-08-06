@@ -683,7 +683,7 @@ export class ReviewService {
   async getReviewTrends(
     startDate: Date,
     endDate: Date,
-    period: '7d' | '30d' | '3m',
+    period: '7d' | '30d' | '3m' | '12m',
     profileId?: string | null,
   ): Promise<Array<{ period: string; count: number; date: string }>> {
     try {
@@ -749,6 +749,12 @@ export class ReviewService {
             ],
           };
           break;
+        case '12m':
+          // Group by month
+          groupByExpression = {
+            $dateToString: { format: '%Y-%m', date: '$reviews.createDate' },
+          };
+          break;
       }
 
       pipeline.push({
@@ -768,19 +774,35 @@ export class ReviewService {
       // Transform the results
       const trends = result.map((item) => {
         let displayDate: string;
-        if (period === '3m') {
-          // For weekly data, convert week format to a readable date
-          const [year, week] = item._id.split('-W');
-          const date = this.getDateFromWeek(parseInt(year), parseInt(week));
-          displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        } else {
-          // For daily data
-          const date = new Date(item._id);
-          if (period === '7d') {
-            displayDate = date.toLocaleDateString('en-US', { weekday: 'short' });
-          } else {
-            displayDate = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
-          }
+
+        switch (period) {
+          case '7d':
+            // For daily data in 7 days
+            const date7d = new Date(item._id);
+            displayDate = date7d.toLocaleDateString('en-US', { weekday: 'short' });
+            break;
+          case '30d':
+            // For daily data in 30 days
+            const date30d = new Date(item._id);
+            displayDate = date30d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+            break;
+          case '3m':
+            // For weekly data in 3 months
+            const [year, week] = item._id.split('-W');
+            const dateWeek = this.getDateFromWeek(parseInt(year), parseInt(week));
+            displayDate = dateWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            break;
+          case '12m':
+            // For monthly data in 12 months
+            const [yearMonth, month] = item._id.split('-');
+            const dateMonth = new Date(parseInt(yearMonth), parseInt(month) - 1, 1);
+            displayDate = dateMonth.toLocaleDateString('en-US', {
+              month: 'short',
+              year: 'numeric',
+            });
+            break;
+          default:
+            displayDate = item._id;
         }
 
         return {
@@ -805,7 +827,7 @@ export class ReviewService {
     trends: Array<{ period: string; count: number; date: string }>,
     startDate: Date,
     endDate: Date,
-    period: '7d' | '30d' | '3m',
+    period: '7d' | '30d' | '3m' | '12m',
   ): Array<{ period: string; count: number; date: string }> {
     const filledData: Array<{ period: string; count: number; date: string }> = [];
     const existingData = new Map(trends.map((t) => [t.date, t]));
@@ -821,27 +843,49 @@ export class ReviewService {
       case '3m':
         increment = 7; // Weekly
         break;
+      case '12m':
+        increment = 30; // Monthly (approximate)
+        break;
     }
 
     while (currentDate <= endDate) {
       let dateKey: string;
       let displayDate: string;
 
-      if (period === '3m') {
-        const year = currentDate.getFullYear();
-        const week = this.getWeekNumber(currentDate);
-        dateKey = `${year}-W${week}`;
-        displayDate = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      } else {
-        dateKey = currentDate.toISOString().split('T')[0];
-        if (period === '7d') {
+      switch (period) {
+        case '7d':
+          dateKey = currentDate.toISOString().split('T')[0];
           displayDate = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
-        } else {
+          break;
+        case '30d':
+          dateKey = currentDate.toISOString().split('T')[0];
           displayDate = currentDate.toLocaleDateString('en-US', {
             month: 'numeric',
             day: 'numeric',
           });
-        }
+          break;
+        case '3m':
+          const year = currentDate.getFullYear();
+          const week = this.getWeekNumber(currentDate);
+          dateKey = `${year}-W${week}`;
+          displayDate = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          break;
+        case '12m':
+          const yearMonth = currentDate.getFullYear();
+          const monthNum = currentDate.getMonth() + 1;
+          dateKey = `${yearMonth}-${monthNum.toString().padStart(2, '0')}`;
+          displayDate = currentDate.toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric',
+          });
+          currentDate.setMonth(currentDate.getMonth() + 1); // Move to next month
+          break;
+        default:
+          dateKey = currentDate.toISOString().split('T')[0];
+          displayDate = currentDate.toLocaleDateString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+          });
       }
 
       const existing = existingData.get(dateKey);
@@ -853,7 +897,10 @@ export class ReviewService {
         },
       );
 
-      currentDate.setDate(currentDate.getDate() + increment);
+      // Only increment date if not 12m (handled above)
+      if (period !== '12m') {
+        currentDate.setDate(currentDate.getDate() + increment);
+      }
     }
 
     return filledData;
