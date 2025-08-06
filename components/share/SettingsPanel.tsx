@@ -1,13 +1,12 @@
 'use client';
-
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Bell, Globe, Palette, Shield, Sun, User } from 'lucide-react';
-import { useState } from 'react';
-
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 const themeColors = [
   {
     name: 'Caribbean Current',
@@ -232,26 +231,34 @@ const themeColors = [
     },
   },
 ];
-
 interface SettingsPanelProps {
   onClose: () => void;
 }
-
 const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
   const [selectedTheme, setSelectedTheme] = useState(themeColors[0]); // Caribbean Current as default
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
   const [publicProfile, setPublicProfile] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Sync darkMode state with actual theme
+  useEffect(() => {
+    setDarkMode(theme === 'dark');
+  }, [theme]);
 
   const handleThemeChange = (theme: (typeof themeColors)[0]) => {
     setSelectedTheme(theme);
     const root = document.documentElement;
-
     // Update all CSS variables
     Object.entries(theme.variables).forEach(([property, value]) => {
       root.style.setProperty(property, value);
     });
+  };
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setDarkMode(checked);
+    setTheme(checked ? 'dark' : 'light');
   };
 
   return (
@@ -295,9 +302,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             ))}
           </div>
         </div>
-
         <Separator className="bg-border" />
-
         {/* Appearance Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -312,15 +317,13 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
               </div>
               <Switch
                 checked={darkMode}
-                onCheckedChange={setDarkMode}
+                onCheckedChange={handleDarkModeToggle}
                 className="data-[state=checked]:bg-primary"
               />
             </div>
           </div>
         </div>
-
         <Separator className="bg-border" />
-
         {/* Notification Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -341,9 +344,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </div>
           </div>
         </div>
-
         <Separator className="bg-border" />
-
         {/* Account Settings */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -375,9 +376,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </div>
           </div>
         </div>
-
         <Separator className="bg-border" />
-
         {/* Privacy & Security */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -405,9 +404,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </Button>
           </div>
         </div>
-
         <Separator className="bg-border" />
-
         {/* Language & Region */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -429,7 +426,6 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             </Button>
           </div>
         </div>
-
         {/* Action Buttons */}
         <div className="pt-4 space-y-2">
           <Button
@@ -450,5 +446,4 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     </>
   );
 };
-
 export default SettingsPanel;
