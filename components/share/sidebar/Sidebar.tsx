@@ -2,12 +2,6 @@
 
 import SearchIcon from '@/components/icons/SearchIcon';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -39,34 +33,10 @@ const ReviewsIcon = () => (
     <path d="M12 17v-2" />
   </svg>
 );
-const AnalyticsIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 3v18h18" />
-    <path d="M7 12l3-3 3 3 5-5" />
-    <circle cx="7" cy="12" r="1" />
-    <circle cx="10" cy="9" r="1" />
-    <circle cx="13" cy="12" r="1" />
-    <circle cx="18" cy="7" r="1" />
-  </svg>
-);
 const SettingsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
     <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-const BusinessIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-    <path d="M9 7h6" />
-  </svg>
-);
-const AutomationIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="4" width="20" height="13" rx="2" />
-    <path d="M8 9l3 3-3 3" />
-    <path d="M13 15h3" />
   </svg>
 );
 const HelpIcon = () => (
@@ -76,17 +46,17 @@ const HelpIcon = () => (
     <circle cx="12" cy="17" r="1" fill="currentColor" />
   </svg>
 );
-const ChevronDownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-);
 
 interface NavItem {
   path?: string;
   label: string;
   icon: React.ComponentType;
-  subRoutes?: { path: string; label: string; badge?: string | number }[];
+  subRoutes?: {
+    path: string;
+    label: string;
+    icon?: React.ComponentType;
+    badge?: string | number;
+  }[];
   badge?: string | number;
   isSheet?: boolean;
 }
@@ -102,22 +72,31 @@ const Sidebar: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [openItem, setOpenItem] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string>('all');
+  const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
-
-  // Get current profile from URL params
-  useEffect(() => {
-    const profileIdFromUrl = searchParams.get('profileId') || 'all';
-    setSelectedProfile(profileIdFromUrl);
-  }, [searchParams]);
 
   // Fetch business profiles on component mount
   useEffect(() => {
     fetchBusinessProfiles();
   }, []);
+
+  // Set selected profile from URL or default to first profile
+  useEffect(() => {
+    const profileIdFromUrl = searchParams.get('profileId');
+    if (profileIdFromUrl) {
+      setSelectedProfile(profileIdFromUrl);
+    } else if (businessProfiles.length > 0 && !selectedProfile) {
+      // Default to first business profile
+      const firstProfile = businessProfiles[0];
+      setSelectedProfile(firstProfile.profileId);
+      // Update URL with the first profile
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('profileId', firstProfile.profileId);
+      router.replace(`${pathname}${currentUrl.search}`);
+    }
+  }, [searchParams, businessProfiles, selectedProfile, pathname, router]);
 
   const fetchBusinessProfiles = async () => {
     try {
@@ -138,19 +117,14 @@ const Sidebar: React.FC = () => {
     setSelectedProfile(profileId);
     // Update URL with the selected profileId
     const currentUrl = new URL(window.location.href);
-    if (profileId === 'all') {
-      currentUrl.searchParams.delete('profileId');
-    } else {
-      currentUrl.searchParams.set('profileId', profileId);
-    }
+    currentUrl.searchParams.set('profileId', profileId);
     // Use router.replace to update URL without page reload
     router.replace(`${pathname}${currentUrl.search}`);
   };
 
   const getSelectedProfileName = () => {
-    if (selectedProfile === 'all') return 'All Profiles';
     const profile = businessProfiles.find((p) => p.profileId === selectedProfile);
-    return profile ? profile?.profileName?.split('-')[1] : 'Unknown Profile';
+    return profile ? profile?.profileName?.split('-')[1] : 'Loading...';
   };
 
   const menuItems: NavItem[] = [
@@ -164,28 +138,28 @@ const Sidebar: React.FC = () => {
       icon: ReviewsIcon,
       // badge: '24',
       subRoutes: [
-        { path: '/reviews/all', label: 'All Reviews', badge: '' },
-        // { path: '/reviews/pending', label: 'Pending Replies', badge: '12' },
-        // { path: '/reviews/replied', label: 'Replied', badge: '62' },
-        // { path: '/reviews/negative', label: 'Negative Reviews', badge: '3' },
+        { path: '/reviews/all', label: 'All Reviews', icon: ReviewsIcon, badge: '' },
+        // { path: '/reviews/pending', label: 'Pending Replies', icon: ReviewsIcon, badge: '12' },
+        // { path: '/reviews/replied', label: 'Replied', icon: ReviewsIcon, badge: '62' },
+        // { path: '/reviews/negative', label: 'Negative Reviews', icon: ReviewsIcon, badge: '3' },
       ],
     },
     // {
     //   label: 'Business Profiles',
     //   icon: BusinessIcon,
     //   subRoutes: [
-    //     { path: '/business-profiles/1', label: 'Main Branch', badge: '32' },
-    //     { path: '/business-profiles/2', label: 'Downtown', badge: '28' },
-    //     { path: '/business-profiles/3', label: 'Mall Branch', badge: '14' },
+    //     { path: '/business-profiles/1', label: 'Main Branch', icon: BusinessIcon, badge: '32' },
+    //     { path: '/business-profiles/2', label: 'Downtown', icon: BusinessIcon, badge: '28' },
+    //     { path: '/business-profiles/3', label: 'Mall Branch', icon: BusinessIcon, badge: '14' },
     //   ],
     // },
     // {
     //   label: 'Analytics',
     //   icon: AnalyticsIcon,
     //   subRoutes: [
-    //     { path: '/analytics/response-rate', label: 'Response Rate' },
-    //     { path: '/analytics/rating-trends', label: 'Rating Trends' },
-    //     { path: '/analytics/sentiment', label: 'Sentiment Analysis' },
+    //     { path: '/analytics/response-rate', label: 'Response Rate', icon: AnalyticsIcon },
+    //     { path: '/analytics/rating-trends', label: 'Rating Trends', icon: AnalyticsIcon },
+    //     { path: '/analytics/sentiment', label: 'Sentiment Analysis', icon: AnalyticsIcon },
     //   ],
     // },
     // {
@@ -193,9 +167,9 @@ const Sidebar: React.FC = () => {
     //   icon: AutomationIcon,
     //   badge: 'NEW',
     //   subRoutes: [
-    //     { path: '/automation/workflows', label: 'AI Workflows' },
-    //     { path: '/automation/templates', label: 'Reply Templates' },
-    //     { path: '/automation/settings', label: 'Auto-Reply Settings' },
+    //     { path: '/automation/workflows', label: 'AI Workflows', icon: AutomationIcon },
+    //     { path: '/automation/templates', label: 'Reply Templates', icon: AutomationIcon },
+    //     { path: '/automation/settings', label: 'Auto-Reply Settings', icon: AutomationIcon },
     //   ],
     // },
   ];
@@ -248,80 +222,63 @@ const Sidebar: React.FC = () => {
           {menuItems.map((item, index) => (
             <div key={index} className="mb-1">
               {item.subRoutes ? (
-                <Accordion
-                  type="single"
-                  collapsible
-                  value={openItem || undefined}
-                  onValueChange={setOpenItem}
-                >
-                  <AccordionItem value={`item-${index}`} className="border-none">
-                    <AccordionTrigger className="w-full cursor-pointer py-3 px-4 hover:bg-sidebar-primary/10 hover:border hover:border-sidebar-primary/30 rounded-xl text-sm font-medium text-sidebar-foreground hover:text-sidebar-primary hover:no-underline group transition-all duration-200">
-                      <span className="flex items-center justify-between w-full">
-                        <span className="flex items-center gap-3">
-                          <span className="group-hover:text-primary transition-colors">
-                            <item.icon />
-                          </span>
-                          <span>{item.label}</span>
-                        </span>
-                        {item.badge && (
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-sidebar-foreground px-4 pt-5 pb- mb-2">
+                    {item.label}
+                  </p>
+                  <div className="space-y-1">
+                    {item.subRoutes.map((subItem, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        href={`${subItem.path}${
+                          selectedProfile ? `?profileId=${selectedProfile}` : ''
+                        }`}
+                        className={`flex items-center justify-between px-4 py-3 text-sm rounded-xl transition-all duration-200 ${
+                          pathname.startsWith(subItem.path)
+                            ? 'bg-sidebar-primary/10 text-sidebar-primary font-medium border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
+                            : 'text-sidebar-muted-foreground hover:bg-sidebar-primary/10 hover:text-sidebar-primary hover:border hover:border-sidebar-primary/30'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          {subItem.icon ? (
+                            <span
+                              className={`mr-3 ${
+                                pathname.startsWith(subItem.path)
+                                  ? 'text-sidebar-primary'
+                                  : 'text-sidebar-muted-foreground'
+                              }`}
+                            >
+                              <subItem.icon />
+                            </span>
+                          ) : (
+                            <div
+                              className={`w-2 h-2 rounded-full mr-3 ${
+                                pathname.startsWith(subItem.path)
+                                  ? 'bg-sidebar-primary'
+                                  : 'bg-sidebar-muted-foreground'
+                              }`}
+                            ></div>
+                          )}
+                          <span>{subItem.label}</span>
+                        </div>
+                        {subItem.badge && (
                           <span
                             className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              typeof item.badge === 'string'
-                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                              pathname.startsWith(subItem.path)
+                                ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                                 : 'bg-sidebar-muted text-sidebar-muted-foreground'
                             }`}
                           >
-                            {item.badge}
+                            {subItem.badge}
                           </span>
                         )}
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="ml-8 mt-2 space-y-1">
-                        {item.subRoutes.map((subItem, subIndex) => (
-                          <Link
-                            key={subIndex}
-                            href={`${subItem.path}${
-                              selectedProfile !== 'all' ? `?profileId=${selectedProfile}` : ''
-                            }`}
-                            className={`flex items-center justify-between px-4 py-2.5 text-sm rounded-lg transition-all duration-200 ${
-                              pathname.startsWith(subItem.path)
-                                ? 'bg-sidebar-primary/10 text-sidebar-primary font-medium border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
-                                : 'text-sidebar-muted-foreground hover:bg-sidebar-primary/10 hover:text-sidebar-primary hover:border hover:border-sidebar-primary/30'
-                            }`}
-                          >
-                            <div className="flex items-center">
-                              <div
-                                className={`w-2 h-2 rounded-full mr-3 ${
-                                  pathname.startsWith(subItem.path)
-                                    ? 'bg-sidebar-primary'
-                                    : 'bg-sidebar-muted-foreground'
-                                }`}
-                              ></div>
-                              <span>{subItem.label}</span>
-                            </div>
-                            {subItem.badge && (
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                  pathname.startsWith(subItem.path)
-                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                                    : 'bg-sidebar-muted text-sidebar-muted-foreground'
-                                }`}
-                              >
-                                {subItem.badge}
-                              </span>
-                            )}
-                          </Link>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <Link
-                  href={`${item.path!}${
-                    selectedProfile !== 'all' ? `?profileId=${selectedProfile}` : ''
-                  }`}
+                  href={`${item.path!}${selectedProfile ? `?profileId=${selectedProfile}` : ''}`}
                   className={`flex items-center justify-between w-full text-sm py-3 px-4 rounded-xl transition-all duration-200 font-medium group ${
                     isActive(item.path!)
                       ? 'bg-sidebar-primary/10 text-sidebar-primary font-semibold border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
@@ -359,13 +316,13 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Enhanced Bottom Section */}
-      <div className="border-t border-sidebar-border  ">
-        <div className="mb-2 px-1 shadow-lg shadow-primary/5 border-primary/40 border mt-4 mx-4 pb-0.5 rounded-2xl ">
+      <div className="border-t border-sidebar-border">
+        <div className="mb-2 px-1 shadow-lg shadow-primary/5 border-primary/40 border mt-4 mx-4 pb-0.5 rounded-2xl">
           {/* Business Profile Selector */}
-          <label className="text-xs  px-3 pt-2.5 -mb-1   text-sidebar-foreground/70  block">
+          <label className="text-xs px-3 pt-2.5 -mb-1 text-sidebar-foreground/70 block">
             Select Business Profile
           </label>
-          <div className=" ">
+          <div>
             <Select
               value={selectedProfile}
               onValueChange={handleProfileChange}
@@ -373,18 +330,12 @@ const Sidebar: React.FC = () => {
             >
               <SelectTrigger className="!bg-sidebar shadow-none w-full bg-sidebar-muted border-0 border-sidebar-border text-sidebar-foreground">
                 <div className="flex items-center gap-2 text-sidebar-foreground text-lg font-semibold">
-                  <SelectValue className="text-wrap ">
+                  <SelectValue className="text-wrap">
                     {isLoadingProfiles ? 'Loading...' : getSelectedProfileName()}
                   </SelectValue>
                 </div>
               </SelectTrigger>
               <SelectContent className="bg-sidebar border-sidebar-border">
-                <SelectItem value="all" className="text-sidebar-foreground hover:bg-sidebar-muted">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-sidebar-accent rounded-full"></div>
-                    All Profiles
-                  </div>
-                </SelectItem>
                 {businessProfiles.map((profile) => (
                   <SelectItem
                     key={profile.profileId}
@@ -406,11 +357,6 @@ const Sidebar: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            {/* {selectedProfile !== 'all' && (
-              <div className="text-xs text-sidebar-muted-foreground mt-1">
-                Showing data for selected profile
-              </div>
-            )} */}
           </div>
         </div>
 
