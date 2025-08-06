@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+
 import { BarChart3 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface ReviewTrendsProps {
   dashboardStats: {
-    reviewTrends: Array<{ month: string; count: number; rating: number }>;
-    reviewTrends3Months: Array<{ month: string; count: number; rating: number }>;
-    reviewTrends30Days: Array<{ day: string; count: number; rating: number }>;
-    reviewTrends7Days: Array<{ day: string; count: number; rating: number }>;
+    reviewTrends?: Array<{ month: string; count: number; rating?: number }>;
+    reviewTrends3Months?: Array<{ month: string; count: number; rating?: number }>;
+    reviewTrends30Days?: Array<{ day: string; count: number; rating?: number }>;
+    reviewTrends7Days?: Array<{ day: string; count: number; rating?: number }>;
   };
   selectedTimeframe: string;
 }
@@ -34,6 +36,9 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
   const chartData = getChartData();
   const dataKey = getChartDataKey();
 
+  console.log('ReviewTrends - selectedTimeframe:', selectedTimeframe);
+  console.log('ReviewTrends - chartData:', chartData);
+
   return (
     <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400 border-2 border-chart-1/80 shadow-chart-1/15">
       <div className="flex items-center justify-between mb-6">
@@ -54,7 +59,6 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
           ))}
         </div>
       </div>
-
       {chartData.length > 0 ? (
         <div className="w-full overflow-hidden">
           <ResponsiveContainer width="100%" height={300}>
@@ -85,8 +89,10 @@ export default function ReviewTrends({ dashboardStats, selectedTimeframe }: Revi
                   fontWeight: '500',
                   color: '#1B5551',
                 }}
+                formatter={(value: any) => [value, 'Reviews']}
+                labelFormatter={(label: string) => `Period: ${label}`}
               />
-              <Bar dataKey="count" fill="currentColor" radius={[4, 4, 0, 0]} name="Reviews" />
+              <Bar dataKey="count" fill="#0B5C58" radius={[4, 4, 0, 0]} name="Reviews" />
             </BarChart>
           </ResponsiveContainer>
         </div>

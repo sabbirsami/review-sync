@@ -8,14 +8,11 @@ import ReviewTrends from './components/ReviewTrends';
 import RightPanel from './components/RightPanel';
 import StatsCards from './components/StatsCards';
 
-interface DashboardPageProps {
-  searchParams: Promise<{
-    tab?: string;
-    timeframe?: string;
-  }>;
-}
-
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; timeframe?: string }>;
+}) {
   // Await the searchParams Promise
   const params = await searchParams;
   const activeTab = params.tab || 'Value comparison';
@@ -29,11 +26,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
     const [statsRes, reviewsRes] = await Promise.all([
-      fetch(`${apiUrl}/api/stats`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/api/stats`, { cache: 'no-store' }),
       fetch(`${apiUrl}/api/reviews?limit=4`, {
-        next: { revalidate: 3600 },
+        cache: 'no-store',
       }),
     ]);
 
@@ -45,7 +41,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
     dashboardStats = statsData.dashboardStats;
     profileStats = statsData.profileStats || [];
-    recentReviews = reviewsData.reviews || [];
+    recentReviews = reviewsData.success ? reviewsData.data.reviews || [] : [];
   } catch (err) {
     console.error('Error fetching data:', err);
     error = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -68,7 +64,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   <TabsTrigger
                     key={tab}
                     value={tab}
-                    // href={`?tab=${tab}`}
                     className={`py-3.5 px-0 mr-8 text-sm font-medium border-b-4 border-t-0 border-x-0 data-[state=active]:bg-white bg-white rounded-none data-[state=active]:shadow-none ${
                       activeTab === tab
                         ? 'border-primary text-primary bg-white'
@@ -87,19 +82,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       {/* Content */}
       <div className="flex-1 p-6 space-y-6">
         <StatsCards dashboardStats={dashboardStats} />
-
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2">
             <ReviewTrends dashboardStats={dashboardStats} selectedTimeframe={selectedTimeframe} />
           </div>
           <RatingDistribution dashboardStats={dashboardStats} />
         </div>
-
         <ResponsePerformance dashboardStats={dashboardStats} />
-
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2 pt-2">
-            <RecentActivity recentReviews={recentReviews} />
+            <RecentActivity initialReviews={recentReviews} />
           </div>
           <RightPanel dashboardStats={dashboardStats} profileStats={profileStats} />
         </div>

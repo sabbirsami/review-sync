@@ -1,4 +1,3 @@
-// /review/all/components/ReviewCard.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -23,6 +22,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
         : rating === 'FOUR'
         ? 4
         : 5;
+
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
@@ -40,13 +40,13 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
                 <Image
-                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg'}
+                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg?height=32&width=32'}
                   alt={review?.reviewer?.displayName || 'Reviewer'}
                   width={32}
                   height={32}
                   className="object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    (e.target as HTMLImageElement).src = '/placeholder.svg?height=32&width=32';
                   }}
                 />
               </div>
@@ -71,6 +71,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
             <div className="flex items-center gap-0.5">{getRatingStars(review?.starRating)}</div>
           </div>
         </div>
+
         {/* Review Content */}
         <div className="flex-grow flex flex-col">
           <div className="bg-[#F0EDE0]/0 rounded-sm mb-3 backdrop-blur-sm">
@@ -80,7 +81,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                   isExpanded ? '' : 'line-clamp-3'
                 }`}
               >
-                {review?.comment ? review?.comment : 'No comment'}
+                {review?.comment ? review?.comment : 'No comment provided'}
               </p>
               {review?.comment && review?.comment?.length > 150 && (
                 <button
@@ -102,6 +103,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
               )}
             </div>
           </div>
+
           {/* Action Section */}
           <div className="pt-2 text-xs border-t border-background">
             {review?.reviewReply ? (
@@ -110,7 +112,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                   onClick={() => setIsReplyExpanded(!isReplyExpanded)}
                   className="w-full text-left group"
                 >
-                  <div className="flex items-center justify-between transition-colars">
+                  <div className="flex items-center justify-between transition-colors">
                     <div className="flex items-center text-xs text-primary font-medium">
                       <span>{review?.reviewReply?.aiGenerated ? '✨ AI Reply' : 'Show Reply'}</span>
                     </div>
@@ -121,6 +123,7 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                     )}
                   </div>
                 </button>
+
                 {isReplyExpanded && (
                   <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-md p-4 border-l-4 border-primary backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">
