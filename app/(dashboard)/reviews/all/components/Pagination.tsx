@@ -33,7 +33,7 @@ export default function Pagination({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pe-16">
       <div className="text-sm text-gray-600">
         Showing {startItem}-{endItem} of {totalItems} reviews
       </div>
