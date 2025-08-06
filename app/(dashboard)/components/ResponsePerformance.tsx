@@ -2,6 +2,7 @@
 'use client';
 
 import { Clock } from 'lucide-react';
+import { useSearchParams } from 'next/navigation'; // Import useSearchParams
 import { useEffect, useState } from 'react';
 import {
   Area,
@@ -19,6 +20,7 @@ interface ResponsePerformanceProps {
   dashboardStats: {
     responseTrends?: Array<{ month: string; responseTime: number; replyRate: number }>;
   };
+  profileId?: string; // Add profileId prop
 }
 
 type TimePeriod = '7d' | '30d' | '3m';
@@ -31,19 +33,26 @@ interface TrendData {
   date: string;
 }
 
-export default function ResponsePerformance({ dashboardStats }: ResponsePerformanceProps) {
+export default function ResponsePerformance({
+  dashboardStats,
+  profileId,
+}: ResponsePerformanceProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('30d');
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('responseTime');
   const [filteredData, setFilteredData] = useState<TrendData[]>([]);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams(); // Use useSearchParams to get current profileId
 
   // Fetch trend data from API
-  const fetchTrendData = async (period: TimePeriod) => {
+  const fetchTrendData = async (period: TimePeriod, currentProfileId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/response-trends?period=${period}`);
+      const queryParams = new URLSearchParams({ period });
+      if (currentProfileId && currentProfileId !== 'all') {
+        queryParams.set('profileId', currentProfileId);
+      }
+      const response = await fetch(`/api/response-trends?${queryParams.toString()}`);
       const result = await response.json();
-
       if (result.success && result.data) {
         setFilteredData(result.data);
       } else {
@@ -60,8 +69,9 @@ export default function ResponsePerformance({ dashboardStats }: ResponsePerforma
   };
 
   useEffect(() => {
-    fetchTrendData(selectedPeriod);
-  }, [selectedPeriod]);
+    const currentProfileId = searchParams.get('profileId') || 'all';
+    fetchTrendData(selectedPeriod, currentProfileId);
+  }, [selectedPeriod, searchParams]); // Depend on searchParams
 
   const handlePeriodChange = (period: TimePeriod) => {
     setSelectedPeriod(period);
@@ -199,7 +209,6 @@ export default function ResponsePerformance({ dashboardStats }: ResponsePerforma
           <h3 className="text-lg font-semibold text-primary">Response Performance</h3>
           <p className="text-sm text-primary/60 mt-1">{getPeriodLabel(selectedPeriod)}</p>
         </div>
-
         {/* Time Period Selector */}
         <div className="flex items-center gap-4">
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
@@ -217,7 +226,6 @@ export default function ResponsePerformance({ dashboardStats }: ResponsePerforma
               </button>
             ))}
           </div>
-
           {/* Metric Selector */}
           <div className="flex space-x-2">
             <button
@@ -243,15 +251,13 @@ export default function ResponsePerformance({ dashboardStats }: ResponsePerforma
           </div>
         </div>
       </div>
-
       {loading ? (
-        <div className="h-[300px] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="h-[389px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/20 border-t-primary"></div>
         </div>
       ) : filteredData.length > 0 ? (
         <div className="w-full overflow-hidden">
           {renderChart()}
-
           {/* Summary Stats */}
           <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-100">
             <div className="text-center">

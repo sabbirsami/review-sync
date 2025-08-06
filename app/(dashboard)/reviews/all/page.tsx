@@ -12,7 +12,7 @@ interface PageProps {
     search?: string;
     status?: string;
     rating?: string;
-    profile?: string;
+    profileId?: string; // Changed from 'profile' to 'profileId' for consistency
     page?: string;
     limit?: string;
   }>;
@@ -21,11 +21,10 @@ interface PageProps {
 export default async function ReviewMainPage({ searchParams }: PageProps) {
   // Await searchParams before using its properties
   const params = await searchParams;
-
   const searchTerm = params.search || '';
   const filterStatus = params.status || 'all';
   const filterRating = params.rating || 'all';
-  const filterProfile = params.profile || 'all';
+  const filterProfileId = params.profileId || 'all'; // Use profileId
   const currentPage = Number(params.page) || 1;
   const limit = Number(params.limit) || 20;
 
@@ -33,7 +32,7 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
   let totalReviews = 0;
   let totalPages = 1;
   let uniqueProfiles: string[] = [];
-  const loading = false;
+  const loading = false; // This component is a Server Component, loading state is handled by Next.js suspense
 
   try {
     const queryParams = new URLSearchParams({
@@ -41,7 +40,7 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
       page: currentPage.toString(),
       ...(filterStatus !== 'all' && { status: filterStatus }),
       ...(filterRating !== 'all' && { rating: filterRating }),
-      ...(filterProfile !== 'all' && { profileId: filterProfile }),
+      ...(filterProfileId !== 'all' && { profileId: filterProfileId }), // Use profileId
       ...(searchTerm && { search: searchTerm }),
     });
 
@@ -50,8 +49,8 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
     const response = await fetch(`${apiUrl}/api/reviews?${queryParams}`, {
       cache: 'no-store',
     });
-
     const data = await response.json();
+
     if (data.success && data.data) {
       reviews = data.data.reviews;
       totalReviews = data.data.total;
@@ -64,7 +63,7 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
     });
     const profilesData = await profilesResponse.json();
     if (profilesData.profileStats) {
-      uniqueProfiles = profilesData.profileStats.map((p: any) => p.profileName);
+      uniqueProfiles = profilesData.profileStats.map((p: any) => p.profileId); // Map to profileId
     }
   } catch (error) {
     console.error('Error fetching reviews:', error);
@@ -82,27 +81,24 @@ export default async function ReviewMainPage({ searchParams }: PageProps) {
           searchTerm={searchTerm}
           filterStatus={filterStatus}
           filterRating={filterRating}
-          filterProfile={filterProfile}
+          filterProfile={filterProfileId} // Pass profileId
           uniqueProfiles={uniqueProfiles}
         />
       </div>
-
       <div className="flex-1 p-6 space-y-6">
         <ReviewStats
           searchTerm={searchTerm}
           filterStatus={filterStatus}
           filterRating={filterRating}
-          filterProfile={filterProfile}
+          filterProfile={filterProfileId} // Pass profileId
         />
-
         <ReviewGrid
           reviews={reviews}
           searchTerm={searchTerm}
           filterStatus={filterStatus}
           filterRating={filterRating}
-          filterProfile={filterProfile}
+          filterProfile={filterProfileId} // Pass profileId
         />
-
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

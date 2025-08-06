@@ -37,7 +37,6 @@ export default function Pagination({
       <div className="text-sm text-gray-600">
         Showing {startItem}-{endItem} of {totalItems} reviews
       </div>
-
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -50,8 +49,7 @@ export default function Pagination({
           <ChevronLeft className="h-4 w-4" />
           Previous
         </Button>
-
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 hover:!bg-background">
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             let pageNum;
             if (totalPages <= 5) {
@@ -63,7 +61,6 @@ export default function Pagination({
             } else {
               pageNum = currentPage - 2 + i;
             }
-
             return (
               <Button
                 key={pageNum}
@@ -77,9 +74,7 @@ export default function Pagination({
               </Button>
             );
           })}
-
           {totalPages > 5 && currentPage < totalPages - 2 && <span className="px-2">...</span>}
-
           {totalPages > 5 && currentPage < totalPages - 2 && (
             <Button
               variant="outline"
@@ -92,7 +87,6 @@ export default function Pagination({
             </Button>
           )}
         </div>
-
         <Button
           variant="outline"
           size="sm"

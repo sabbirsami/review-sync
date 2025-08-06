@@ -23,7 +23,7 @@ export class ReviewService {
   }
 
   // New method to get recent reviews for dashboard
-  async getRecentReviews(limit: number = 4): Promise<ReviewDocument[]> {
+  async getRecentReviews(limit: number = 4, profileId?: string | null): Promise<ReviewDocument[]> {
     try {
       const result = await this.getAllReviews({ limit, skip: 0 });
       return result.reviews;
@@ -42,12 +42,26 @@ export class ReviewService {
   ): Promise<ResponseTrendData[]> {
     try {
       const collection = await this.getCollection('reviews');
-
       console.log('Fetching response trends for period:', period, 'profileId:', profileId);
       console.log('Date range:', startDate, 'to', endDate);
 
       // Build the aggregation pipeline
-      const pipeline: any[] = [
+      const pipeline: any[] = [];
+
+      // Add profile filter if specified, BEFORE unwind
+      if (profileId && profileId !== 'all') {
+        pipeline.push({
+          $match: {
+            $or: [
+              { businessProfileId: profileId },
+              { businessProfileName: profileId },
+              { businessProfileId: Number(profileId) },
+            ],
+          },
+        });
+      }
+
+      pipeline.push(
         { $unwind: '$reviews' },
         {
           $addFields: {
@@ -86,25 +100,11 @@ export class ReviewService {
             },
           },
         },
-      ];
-
-      // Add profile filter if specified
-      if (profileId && profileId !== 'all') {
-        pipeline.push({
-          $match: {
-            $or: [
-              { businessProfileId: profileId },
-              { businessProfileName: profileId },
-              { businessProfileId: Number(profileId) },
-            ],
-          },
-        });
-      }
+      );
 
       // Group by period
       let groupByExpression: any;
       let dateFormat: string;
-
       switch (period) {
         case '7d':
         case '30d':
@@ -156,11 +156,9 @@ export class ReviewService {
           reviews: { $push: '$reviews' },
         },
       });
-
       pipeline.push({ $sort: { _id: 1 } });
 
       console.log('Response trends pipeline:', JSON.stringify(pipeline, null, 2));
-
       const result = await collection.aggregate(pipeline).toArray();
       console.log('Raw aggregation result:', result);
 
@@ -169,7 +167,6 @@ export class ReviewService {
         const replyRate =
           item.totalReviews > 0 ? (item.repliedReviews / item.totalReviews) * 100 : 0;
         const responseTime = item.avgResponseTime || 0;
-
         let displayDate: string;
         if (period === '3m') {
           // For weekly data, convert week format to a readable date
@@ -198,7 +195,6 @@ export class ReviewService {
 
       // Fill in missing dates/periods with zero values
       const filledTrends = this.fillMissingPeriods(trends, startDate, endDate, period);
-
       console.log('Final response trends:', filledTrends);
       return filledTrends;
     } catch (error) {
@@ -223,7 +219,6 @@ export class ReviewService {
   ): ResponseTrendData[] {
     const filledData: ResponseTrendData[] = [];
     const existingData = new Map(trends.map((t) => [t.date, t]));
-
     const currentDate = new Date(startDate);
     let increment: number;
 
@@ -240,7 +235,6 @@ export class ReviewService {
     while (currentDate <= endDate) {
       let dateKey: string;
       let displayDate: string;
-
       if (period === '3m') {
         const year = currentDate.getFullYear();
         const week = this.getWeekNumber(currentDate);
@@ -269,10 +263,8 @@ export class ReviewService {
           repliedReviews: 0,
         },
       );
-
       currentDate.setDate(currentDate.getDate() + increment);
     }
-
     return filledData;
   }
 
@@ -295,41 +287,51 @@ export class ReviewService {
     try {
       const collection = await this.getCollection('reviews');
       // Build aggregation pipeline to unwind the reviews array
-      const pipeline: any[] = [
-        // Unwind the reviews array to get individual review documents
-        { $unwind: '$reviews' },
-        // Add fields from the parent document to each review
-        {
-          $addFields: {
-            'reviews.businessProfileId': { $toString: '$businessProfileId' },
-            'reviews.businessProfileName': '$businessProfileName',
-            'reviews.executionTimestamp': '$executionTimestamp',
-            'reviews.replyStatus': {
-              $cond: {
-                if: {
-                  $and: [
-                    { $ne: ['$reviews.reviewReply', null] },
-                    { $ne: ['$reviews.reviewReply.comment', null] },
-                    { $ne: ['$reviews.reviewReply.comment', ''] },
-                  ],
-                },
-                then: 'replied',
-                else: 'pending',
+      const pipeline: any[] = [];
+
+      // Add profile filter if specified, BEFORE unwind
+      if (filters?.profileId && filters.profileId !== 'all') {
+        pipeline.push({
+          $match: {
+            $or: [
+              { businessProfileId: filters.profileId },
+              { businessProfileName: filters.profileId },
+              { businessProfileId: Number(filters.profileId) }, // Handle both string and number
+            ],
+          },
+        });
+      }
+
+      // Unwind the reviews array to get individual review documents
+      pipeline.push({ $unwind: '$reviews' });
+
+      // Add fields from the parent document to each review
+      pipeline.push({
+        $addFields: {
+          'reviews.businessProfileId': { $toString: '$businessProfileId' },
+          'reviews.businessProfileName': '$businessProfileName',
+          'reviews.executionTimestamp': '$executionTimestamp',
+          'reviews.replyStatus': {
+            $cond: {
+              if: {
+                $and: [
+                  { $ne: ['$reviews.reviewReply', null] },
+                  { $ne: ['$reviews.reviewReply.comment', null] },
+                  { $ne: ['$reviews.reviewReply.comment', ''] },
+                ],
               },
+              then: 'replied',
+              else: 'pending',
             },
           },
         },
-        // Replace root with the review document
-        { $replaceRoot: { newRoot: '$reviews' } },
-      ];
+      });
+
+      // Replace root with the review document
+      pipeline.push({ $replaceRoot: { newRoot: '$reviews' } });
+
       // Add filters to the pipeline
       const matchConditions: any = {};
-      if (filters?.profileId && filters.profileId !== 'all') {
-        matchConditions.$or = [
-          { businessProfileId: filters.profileId },
-          { businessProfileName: filters.profileId },
-        ];
-      }
       if (filters?.status && filters.status !== 'all') {
         matchConditions.replyStatus = filters.status;
       }
@@ -342,24 +344,26 @@ export class ReviewService {
           { 'reviewer.displayName': { $regex: filters.search, $options: 'i' } },
           { businessProfileName: { $regex: filters.search, $options: 'i' } },
         ];
-        if (matchConditions.$or) {
-          matchConditions.$and = [{ $or: matchConditions.$or }, { $or: searchConditions }];
-          delete matchConditions.$or;
-        } else {
-          matchConditions.$or = searchConditions;
-        }
+        matchConditions.$and = matchConditions.$and
+          ? [...matchConditions.$and, { $or: searchConditions }]
+          : [{ $or: searchConditions }];
       }
+
       // Add match stage if we have conditions
       if (Object.keys(matchConditions).length > 0) {
         pipeline.push({ $match: matchConditions });
       }
+
       // Add sorting
       pipeline.push({ $sort: { createTime: -1 } });
+
       console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
+
       // Get total count
       const countPipeline = [...pipeline, { $count: 'total' }];
       const countResult = await collection.aggregate(countPipeline).toArray();
       const total = countResult[0]?.total || 0;
+
       // Add pagination
       if (filters?.skip) {
         pipeline.push({ $skip: filters.skip });
@@ -367,6 +371,7 @@ export class ReviewService {
       if (filters?.limit) {
         pipeline.push({ $limit: filters.limit });
       }
+
       // Execute the aggregation
       const reviews = (await collection.aggregate(pipeline).toArray()) as ReviewDocument[];
       console.log(`Found ${reviews.length} reviews out of ${total} total`);
@@ -386,15 +391,18 @@ export class ReviewService {
       const existingDoc = await collection.findOne({
         businessProfileId: reviewData.businessProfileId,
       });
+
       if (existingDoc) {
         // Check if this specific review already exists in the reviews array
         const reviewExists = existingDoc.reviews?.some(
           (review: any) => review.reviewId === reviewData.reviewId,
         );
+
         if (reviewExists) {
           console.log(`Review ${reviewData.reviewId} already exists`);
           return reviewData as ReviewDocument;
         }
+
         // Add the new review to the existing document's reviews array
         await collection.updateOne(
           { businessProfileId: reviewData.businessProfileId },
@@ -464,6 +472,7 @@ export class ReviewService {
         },
         { returnDocument: 'after' },
       );
+
       if (result) {
         // Find and return the updated review
         const updatedReview = result.reviews?.find((review: any) => review.reviewId === reviewId);
@@ -483,12 +492,27 @@ export class ReviewService {
     }
   }
 
-  async getDashboardStats(): Promise<DashboardStatsDocument> {
+  async getDashboardStats(profileId?: string | null): Promise<DashboardStatsDocument> {
     try {
       const collection = await this.getCollection('reviews');
       console.log('Calculating dashboard stats...');
-      // Use aggregation to get stats from the nested reviews structure
-      const statsPipeline = [
+
+      const statsPipeline = [];
+
+      // Add profile filter if specified, BEFORE unwind
+      if (profileId && profileId !== 'all') {
+        statsPipeline.push({
+          $match: {
+            $or: [
+              { businessProfileId: profileId },
+              { businessProfileName: profileId },
+              { businessProfileId: Number(profileId) },
+            ],
+          },
+        });
+      }
+
+      statsPipeline.push(
         { $unwind: '$reviews' },
         {
           $addFields: {
@@ -536,9 +560,11 @@ export class ReviewService {
             allReviews: { $push: '$reviews' },
           },
         },
-      ];
+      );
+
       const statsResult = await collection.aggregate(statsPipeline).toArray();
       const stats = statsResult[0];
+
       if (!stats) {
         return {
           totalReviews: 0,
@@ -550,6 +576,7 @@ export class ReviewService {
           lastUpdated: new Date(),
         };
       }
+
       // Calculate rating distribution
       const ratingCounts = stats.ratingDistribution.reduce((acc: any, rating: number) => {
         acc[rating] = (acc[rating] || 0) + 1;
@@ -559,9 +586,11 @@ export class ReviewService {
         rating: parseInt(rating),
         count: count as number,
       }));
+
       // Calculate response rate
       const responseRate =
         stats.totalReviews > 0 ? (stats.repliedReviews / stats.totalReviews) * 100 : 0;
+
       // Calculate review trends (last 6 months)
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -573,10 +602,12 @@ export class ReviewService {
           acc[monthKey] = (acc[monthKey] || 0) + 1;
           return acc;
         }, {});
+
       const reviewTrendsArray = Object.entries(reviewTrends).map(([month, count]) => ({
         month,
         count: count as number,
       }));
+
       const dashboardStats = {
         totalReviews: stats.totalReviews,
         pendingReplies: stats.pendingReplies,
@@ -586,6 +617,7 @@ export class ReviewService {
         ratingDistribution,
         lastUpdated: new Date(),
       };
+
       console.log('Dashboard stats calculated successfully:', dashboardStats);
       return dashboardStats;
     } catch (error) {
@@ -606,6 +638,7 @@ export class ReviewService {
     try {
       const collection = await this.getCollection('reviews');
       console.log('Calculating profile stats...');
+
       const pipeline = [
         { $unwind: '$reviews' },
         {
@@ -660,8 +693,10 @@ export class ReviewService {
           },
         },
       ];
+
       const result = await collection.aggregate(pipeline).toArray();
       console.log('Profile stats raw result:', result);
+
       const profileStats = result.map((item) => ({
         profileId: item._id.profileId,
         profileName: item._id.profileName || 'Unknown Profile',
@@ -671,6 +706,7 @@ export class ReviewService {
         responseRate: Math.round(item.responseRate * 10) / 10,
         lastReviewDate: item.lastReviewDate,
       }));
+
       console.log('Profile stats calculated:', profileStats);
       return profileStats;
     } catch (error) {
@@ -688,12 +724,26 @@ export class ReviewService {
   ): Promise<Array<{ period: string; count: number; date: string }>> {
     try {
       const collection = await this.getCollection('reviews');
-
       console.log('Fetching review trends for period:', period, 'profileId:', profileId);
       console.log('Date range:', startDate, 'to', endDate);
 
       // Build the aggregation pipeline
-      const pipeline: any[] = [
+      const pipeline: any[] = [];
+
+      // Add profile filter if specified, BEFORE unwind
+      if (profileId && profileId !== 'all') {
+        pipeline.push({
+          $match: {
+            $or: [
+              { businessProfileId: profileId },
+              { businessProfileName: profileId },
+              { businessProfileId: Number(profileId) },
+            ],
+          },
+        });
+      }
+
+      pipeline.push(
         { $unwind: '$reviews' },
         {
           $addFields: {
@@ -713,24 +763,10 @@ export class ReviewService {
             },
           },
         },
-      ];
-
-      // Add profile filter if specified
-      if (profileId && profileId !== 'all') {
-        pipeline.push({
-          $match: {
-            $or: [
-              { businessProfileId: profileId },
-              { businessProfileName: profileId },
-              { businessProfileId: Number(profileId) },
-            ],
-          },
-        });
-      }
+      );
 
       // Group by period
       let groupByExpression: any;
-
       switch (period) {
         case '7d':
         case '30d':
@@ -763,18 +799,15 @@ export class ReviewService {
           count: { $sum: 1 },
         },
       });
-
       pipeline.push({ $sort: { _id: 1 } });
 
       console.log('Review trends pipeline:', JSON.stringify(pipeline, null, 2));
-
       const result = await collection.aggregate(pipeline).toArray();
       console.log('Raw review trends result:', result);
 
       // Transform the results
       const trends = result.map((item) => {
         let displayDate: string;
-
         switch (period) {
           case '7d':
             // For daily data in 7 days
@@ -804,7 +837,6 @@ export class ReviewService {
           default:
             displayDate = item._id;
         }
-
         return {
           period: displayDate,
           count: item.count,
@@ -814,7 +846,6 @@ export class ReviewService {
 
       // Fill in missing dates/periods with zero values
       const filledTrends = this.fillMissingReviewPeriods(trends, startDate, endDate, period);
-
       console.log('Final review trends:', filledTrends);
       return filledTrends;
     } catch (error) {
@@ -831,7 +862,6 @@ export class ReviewService {
   ): Array<{ period: string; count: number; date: string }> {
     const filledData: Array<{ period: string; count: number; date: string }> = [];
     const existingData = new Map(trends.map((t) => [t.date, t]));
-
     const currentDate = new Date(startDate);
     let increment: number;
 
@@ -851,7 +881,6 @@ export class ReviewService {
     while (currentDate <= endDate) {
       let dateKey: string;
       let displayDate: string;
-
       switch (period) {
         case '7d':
           dateKey = currentDate.toISOString().split('T')[0];
@@ -902,7 +931,6 @@ export class ReviewService {
         currentDate.setDate(currentDate.getDate() + increment);
       }
     }
-
     return filledData;
   }
 }

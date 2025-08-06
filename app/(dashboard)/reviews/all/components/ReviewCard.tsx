@@ -22,7 +22,6 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
         : rating === 'FOUR'
         ? 4
         : 5;
-
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
@@ -123,7 +122,6 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
                     )}
                   </div>
                 </button>
-
                 {isReplyExpanded && (
                   <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-md p-4 border-l-4 border-primary backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-2">

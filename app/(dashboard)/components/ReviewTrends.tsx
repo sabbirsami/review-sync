@@ -2,6 +2,7 @@
 'use client';
 
 import { BarChart3 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -22,6 +23,8 @@ interface TrendData {
   date: string;
 }
 
+type TimeframePeriod = '12 Months' | '3 Months' | '30 Days' | '7 Days';
+
 export default function ReviewTrends({
   dashboardStats,
   selectedTimeframe,
@@ -30,6 +33,10 @@ export default function ReviewTrends({
   const [chartData, setChartData] = useState<TrendData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentTimeframe, setCurrentTimeframe] = useState<TimeframePeriod>(
+    (selectedTimeframe as TimeframePeriod) || '30 Days',
+  );
+  const searchParams = useSearchParams();
 
   // Map selectedTimeframe to API period format
   const getApiPeriod = (timeframe: string): '7d' | '30d' | '3m' | '12m' => {
@@ -49,24 +56,21 @@ export default function ReviewTrends({
 
   // Get the appropriate data key for the chart
   const getChartDataKey = () => {
-    return selectedTimeframe === '7 Days' || selectedTimeframe === '30 Days' ? 'day' : 'month';
+    return currentTimeframe === '7 Days' || currentTimeframe === '30 Days' ? 'day' : 'month';
   };
 
   // Fetch trend data from API
-  const fetchTrendData = async (timeframe: string) => {
+  const fetchTrendData = async (timeframe: string, currentProfileId: string) => {
     setLoading(true);
     setError(null);
-
     try {
       const period = getApiPeriod(timeframe);
-      let url = `/api/review-trends?period=${period}`;
-
-      if (profileId && profileId !== 'all') {
-        url += `&profileId=${profileId}`;
+      const queryParams = new URLSearchParams({ period });
+      if (currentProfileId && currentProfileId !== 'all') {
+        queryParams.set('profileId', currentProfileId);
       }
-
+      const url = `/api/review-trends?${queryParams.toString()}`;
       console.log('Fetching review trends from:', url);
-
       const response = await fetch(url);
       const result = await response.json();
 
@@ -78,7 +82,6 @@ export default function ReviewTrends({
           day: item.period,
           month: item.period,
         }));
-
         setChartData(transformedData);
         console.log('Review trends data fetched:', transformedData);
       } else {
@@ -100,7 +103,6 @@ export default function ReviewTrends({
   // Fallback to dashboard stats if API fails
   const getFallbackData = (timeframe: string): TrendData[] => {
     let fallbackData: any[] = [];
-
     switch (timeframe) {
       case '7 Days':
         fallbackData = dashboardStats.reviewTrends7Days || [];
@@ -115,7 +117,6 @@ export default function ReviewTrends({
       default:
         fallbackData = dashboardStats.reviewTrends || [];
     }
-
     return fallbackData.map((item: any) => ({
       period: item.month || item.day || 'Unknown',
       count: item.count || 0,
@@ -123,14 +124,19 @@ export default function ReviewTrends({
     }));
   };
 
+  // Handle timeframe change
+  const handleTimeframeChange = (timeframe: TimeframePeriod) => {
+    setCurrentTimeframe(timeframe);
+  };
+
   // Fetch data when timeframe or profileId changes
   useEffect(() => {
-    fetchTrendData(selectedTimeframe);
-  }, [selectedTimeframe, profileId]);
+    const currentProfileId = searchParams.get('profileId') || 'all';
+    fetchTrendData(currentTimeframe, currentProfileId);
+  }, [currentTimeframe, searchParams]);
 
   const dataKey = getChartDataKey();
-
-  console.log('ReviewTrends - selectedTimeframe:', selectedTimeframe);
+  console.log('ReviewTrends - selectedTimeframe:', currentTimeframe);
   console.log('ReviewTrends - chartData:', chartData);
   console.log('ReviewTrends - loading:', loading);
 
@@ -148,25 +154,24 @@ export default function ReviewTrends({
           {loading && <p className="text-xs text-primary/60 mt-1">Loading...</p>}
         </div>
         <div className="flex space-x-2">
-          {['12 Months', '3 Months', '30 Days', '7 Days'].map((period) => (
-            <a
+          {(['12 Months', '3 Months', '30 Days', '7 Days'] as TimeframePeriod[]).map((period) => (
+            <button
               key={period}
-              href={`?timeframe=${period}`}
+              onClick={() => handleTimeframeChange(period)}
               className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
-                selectedTimeframe === period
+                currentTimeframe === period
                   ? 'bg-primary text-white shadow-md'
                   : 'text-primary/70 hover:bg-[#F0EDE0] hover:text-primary'
               }`}
             >
               {period}
-            </a>
+            </button>
           ))}
         </div>
       </div>
-
       {loading ? (
-        <div className="h-[300px] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="h-[280px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/20 border-t-primary"></div>
         </div>
       ) : chartData.length > 0 ? (
         <div className="w-full overflow-hidden">
@@ -187,15 +192,15 @@ export default function ReviewTrends({
                 axisLine={false}
                 tickLine={false}
                 angle={
-                  selectedTimeframe === '3 Months' || selectedTimeframe === '12 Months' ? -45 : 0
+                  currentTimeframe === '3 Months' || currentTimeframe === '12 Months' ? -45 : 0
                 }
                 textAnchor={
-                  selectedTimeframe === '3 Months' || selectedTimeframe === '12 Months'
+                  currentTimeframe === '3 Months' || currentTimeframe === '12 Months'
                     ? 'end'
                     : 'middle'
                 }
                 height={
-                  selectedTimeframe === '3 Months' || selectedTimeframe === '12 Months' ? 60 : 30
+                  currentTimeframe === '3 Months' || currentTimeframe === '12 Months' ? 60 : 30
                 }
               />
               <YAxis
@@ -230,7 +235,6 @@ export default function ReviewTrends({
               />
             </BarChart>
           </ResponsiveContainer>
-
           {/* Summary Stats */}
           {/* <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-100">
             <div className="text-center">
@@ -241,7 +245,7 @@ export default function ReviewTrends({
               <p className="text-2xl font-bold text-blue-600">{avgReviews}</p>
               <p className="text-xs text-primary/60">
                 Avg per{' '}
-                {selectedTimeframe === '7 Days' || selectedTimeframe === '30 Days'
+                {currentTimeframe === '7 Days' || currentTimeframe === '30 Days'
                   ? 'Day'
                   : 'Period'}
               </p>

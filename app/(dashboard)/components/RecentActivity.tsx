@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface Review {
@@ -39,26 +40,36 @@ interface Review {
 
 interface RecentActivityProps {
   initialReviews?: Review[];
+  profileId?: string; // Add profileId prop
 }
 
-export default function RecentActivity({ initialReviews = [] }: RecentActivityProps) {
+export default function RecentActivity({ initialReviews = [], profileId }: RecentActivityProps) {
   const [recentReviews, setRecentReviews] = useState<Review[]>(initialReviews);
   const [loading, setLoading] = useState(!initialReviews.length);
   const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
+  const searchParams = useSearchParams(); // Use useSearchParams to get current profileId
 
   useEffect(() => {
-    if (!initialReviews.length) {
-      fetchRecentReviews();
+    // Only fetch if initialReviews are empty or if profileId changes
+    const currentProfileId = searchParams.get('profileId') || 'all';
+    if (!initialReviews.length || currentProfileId !== profileId) {
+      fetchRecentReviews(currentProfileId);
+    } else {
+      setRecentReviews(initialReviews);
+      setLoading(false);
     }
-  }, [initialReviews.length]);
+  }, [initialReviews, searchParams, profileId]); // Depend on searchParams and profileId
 
-  const fetchRecentReviews = async () => {
+  const fetchRecentReviews = async (currentProfileId: string) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/reviews?limit=4&page=1');
+      const queryParams = new URLSearchParams({ limit: '4', page: '1' });
+      if (currentProfileId !== 'all') {
+        queryParams.set('profileId', currentProfileId);
+      }
+      const response = await fetch(`/api/reviews?${queryParams.toString()}`);
       const data = await response.json();
-
       if (data.success && data.data?.reviews) {
         setRecentReviews(data.data.reviews);
       }

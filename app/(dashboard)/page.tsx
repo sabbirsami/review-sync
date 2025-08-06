@@ -11,12 +11,13 @@ import StatsCards from './components/StatsCards';
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; timeframe?: string }>;
+  searchParams: Promise<{ tab?: string; timeframe?: string; profileId?: string }>;
 }) {
   // Await the searchParams Promise
   const params = await searchParams;
   const activeTab = params.tab || 'Value comparison';
   const selectedTimeframe = params.timeframe || '12 Months';
+  const selectedProfileId = params.profileId || 'all'; // Get profileId from search params
 
   // Fetch data in the server component
   let dashboardStats = null;
@@ -26,9 +27,21 @@ export default async function DashboardPage({
 
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+    // Construct query params for stats and reviews
+    const statsQueryParams = new URLSearchParams();
+    if (selectedProfileId !== 'all') {
+      statsQueryParams.set('profileId', selectedProfileId);
+    }
+
+    const reviewsQueryParams = new URLSearchParams({ limit: '4' });
+    if (selectedProfileId !== 'all') {
+      reviewsQueryParams.set('profileId', selectedProfileId);
+    }
+
     const [statsRes, reviewsRes] = await Promise.all([
-      fetch(`${apiUrl}/api/stats`, { cache: 'no-store' }),
-      fetch(`${apiUrl}/api/reviews?limit=4`, {
+      fetch(`${apiUrl}/api/stats?${statsQueryParams.toString()}`, { cache: 'no-store' }),
+      fetch(`${apiUrl}/api/reviews?${reviewsQueryParams.toString()}`, {
         cache: 'no-store',
       }),
     ]);
@@ -51,23 +64,23 @@ export default async function DashboardPage({
   if (!dashboardStats) return <LoadingError />;
 
   return (
-    <div className="min-h-screen bg-[#F7F4E9] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-primary pt-4">
+      <div className="bg-white border-b border-primary/50 pt-4">
         <Header title={'Business Analytics'} />
         {/* Tabs */}
         <div className="px-6 sticky top-0 bg-white">
-          <Tabs value={activeTab} className="sticky top-[68px] bg-white z-10">
+          <Tabs value={activeTab} className="sticky top-[68px] ¡bg-white z-10">
             <TabsList className="bg-white p-0 h-auto">
               {['Value comparison', 'Average values', 'Configure analysis', 'Filter analysis'].map(
                 (tab) => (
                   <TabsTrigger
                     key={tab}
                     value={tab}
-                    className={`py-3.5 px-0 mr-8 text-sm font-medium border-b-4 border-t-0 border-x-0 data-[state=active]:bg-white bg-white rounded-none data-[state=active]:shadow-none ${
+                    className={`py-3.5 px-0 mr-8 text-sm font-medium border-b-4 border-t-0 border-x-0 data-[state=active]:bg-white dark:data-[state=active]:bg-white ¡bg-white rounded-none data-[state=active]:shadow-none ${
                       activeTab === tab
-                        ? 'border-primary text-primary bg-white'
-                        : 'border-transparent text-foreground/60 hover:text-foreground'
+                        ? 'border-primary dark:!border-primary ¡text-primary ¡bg-white'
+                        : '¡border-transparent dark:¡text-foreground/60 text-foreground/60 dark:hover:¡text-foreground hover:¡text-foreground'
                     }`}
                   >
                     {tab}
@@ -84,14 +97,24 @@ export default async function DashboardPage({
         <StatsCards dashboardStats={dashboardStats} />
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2">
-            <ReviewTrends dashboardStats={dashboardStats} selectedTimeframe={selectedTimeframe} />
+            <ReviewTrends
+              dashboardStats={dashboardStats}
+              selectedTimeframe={selectedTimeframe}
+              profileId={selectedProfileId} // Pass profileId to ReviewTrends
+            />
           </div>
           <RatingDistribution dashboardStats={dashboardStats} />
         </div>
-        <ResponsePerformance dashboardStats={dashboardStats} />
+        <ResponsePerformance
+          dashboardStats={dashboardStats}
+          profileId={selectedProfileId} // Pass profileId to ResponsePerformance
+        />
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2 pt-2">
-            <RecentActivity initialReviews={recentReviews} />
+            <RecentActivity
+              initialReviews={recentReviews}
+              profileId={selectedProfileId} // Pass profileId to RecentActivity
+            />
           </div>
           <RightPanel dashboardStats={dashboardStats} profileStats={profileStats} />
         </div>

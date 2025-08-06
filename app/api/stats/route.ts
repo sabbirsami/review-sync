@@ -45,36 +45,17 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('Fetching dashboard stats...');
-    const dashboardStats = await reviewService.getDashboardStats();
+    // Pass profileId to getDashboardStats
+    const dashboardStats = await reviewService.getDashboardStats(profileId);
     console.log('Dashboard stats fetched:', dashboardStats);
 
     console.log('Fetching profile stats...');
     const profileStats = await reviewService.getProfileStats();
     console.log('Profile stats fetched:', profileStats);
 
-    // Handle profileId filtering with both string and number comparisons
-    if (profileId && profileId !== 'all') {
-      const profile = profileStats.find(
-        (p) =>
-          p.profileId === profileId ||
-          p.profileName === profileId ||
-          p.profileId === Number(profileId).toString() ||
-          Number(p.profileId) === Number(profileId),
-      );
-
-      if (profile) {
-        return NextResponse.json({
-          profile,
-          dashboardStats: {
-            ...dashboardStats,
-            totalReviews: profile.totalReviews,
-            pendingReplies: profile.pendingReplies,
-            averageRating: profile.averageRating,
-            responseRate: profile.responseRate,
-          },
-        });
-      }
-    }
+    // The dashboardStats are now already filtered if profileId was provided.
+    // The profileStats are for all profiles, used for the dropdown.
+    // No need for client-side filtering of dashboardStats here.
 
     console.log('=== Stats API Success ===');
     return NextResponse.json({
