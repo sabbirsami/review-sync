@@ -164,7 +164,7 @@ const Sidebar: React.FC = () => {
       icon: ReviewsIcon,
       // badge: '24',
       subRoutes: [
-        { path: '/reviews/all', label: 'All Reviews', badge: '74' },
+        { path: '/reviews/all', label: 'All Reviews', badge: '' },
         // { path: '/reviews/pending', label: 'Pending Replies', badge: '12' },
         // { path: '/reviews/replied', label: 'Replied', badge: '62' },
         // { path: '/reviews/negative', label: 'Negative Reviews', badge: '3' },

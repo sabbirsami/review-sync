@@ -253,7 +253,7 @@ export default function ResponsePerformance({
       </div>
       {loading ? (
         <div className="h-[389px] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/20 border-t-primary"></div>
         </div>
       ) : filteredData.length > 0 ? (
         <div className="w-full overflow-hidden">
