@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/components/provider/theme/theme-provider';
 import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
 import type React from 'react';
@@ -14,7 +15,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={dmSans.className}>
-        <main className="bg-[#F8F8F8]">{children}</main>
+        <main className="bg-background">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </main>
       </body>
     </html>
   );
