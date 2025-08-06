@@ -7,12 +7,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SettingsPanel from '../SettingsPanel';
 
 // Enhanced Icons
@@ -76,6 +83,12 @@ const HelpIcon = () => (
   </svg>
 );
 
+const ChevronDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 interface NavItem {
   path?: string;
   label: string;
@@ -85,11 +98,71 @@ interface NavItem {
   isSheet?: boolean;
 }
 
+interface BusinessProfile {
+  profileId: string;
+  profileName: string;
+  totalReviews: number;
+}
+
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [openItem, setOpenItem] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<string>('all');
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+
+  // Get current profile from URL params
+  useEffect(() => {
+    const profileIdFromUrl = searchParams.get('profileId') || 'all';
+    setSelectedProfile(profileIdFromUrl);
+  }, [searchParams]);
+
+  // Fetch business profiles on component mount
+  useEffect(() => {
+    fetchBusinessProfiles();
+  }, []);
+
+  const fetchBusinessProfiles = async () => {
+    try {
+      setIsLoadingProfiles(true);
+      const response = await fetch('/api/stats');
+      const data = await response.json();
+
+      if (data.profileStats && Array.isArray(data.profileStats)) {
+        setBusinessProfiles(data.profileStats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch business profiles:', error);
+    } finally {
+      setIsLoadingProfiles(false);
+    }
+  };
+
+  const handleProfileChange = (profileId: string) => {
+    setSelectedProfile(profileId);
+
+    // Update URL with the selected profileId
+    const currentUrl = new URL(window.location.href);
+
+    if (profileId === 'all') {
+      currentUrl.searchParams.delete('profileId');
+    } else {
+      currentUrl.searchParams.set('profileId', profileId);
+    }
+
+    // Use router.replace to update URL without page reload
+    router.replace(`${pathname}${currentUrl.search}`);
+  };
+
+  const getSelectedProfileName = () => {
+    if (selectedProfile === 'all') return 'All Profiles';
+    const profile = businessProfiles.find((p) => p.profileId === selectedProfile);
+    return profile ? profile?.profileName?.split('-')[1] : 'Unknown Profile';
+  };
 
   const menuItems: NavItem[] = [
     {
@@ -148,7 +221,7 @@ const Sidebar: React.FC = () => {
   return (
     <div className="h-screen sticky top-0 bg-sidebar flex flex-col shadow-2xl border-r border-sidebar-border">
       {/* Enhanced Logo Section */}
-      <div className="py-6 px-6 border-b border-sidebar-border">
+      <div className="py-5 px-6 border-b border-sidebar-border">
         <div className="flex items-center space-x-3">
           <Image
             src="/logo-primary.png"
@@ -219,7 +292,9 @@ const Sidebar: React.FC = () => {
                         {item.subRoutes.map((subItem, subIndex) => (
                           <Link
                             key={subIndex}
-                            href={subItem.path}
+                            href={`${subItem.path}${
+                              selectedProfile !== 'all' ? `?profileId=${selectedProfile}` : ''
+                            }`}
                             className={`flex items-center justify-between px-4 py-2.5 text-sm rounded-lg transition-all duration-200 ${
                               pathname.startsWith(subItem.path)
                                 ? 'bg-sidebar-primary/10 text-sidebar-primary font-medium border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
@@ -255,7 +330,9 @@ const Sidebar: React.FC = () => {
                 </Accordion>
               ) : (
                 <Link
-                  href={item.path!}
+                  href={`${item.path!}${
+                    selectedProfile !== 'all' ? `?profileId=${selectedProfile}` : ''
+                  }`}
                   className={`flex items-center justify-between w-full text-sm py-3 px-4 rounded-xl transition-all duration-200 font-medium group ${
                     isActive(item.path!)
                       ? 'bg-sidebar-primary/10 text-sidebar-primary font-semibold border border-sidebar-primary/30 shadow-lg shadow-sidebar-primary/10'
@@ -293,23 +370,63 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Enhanced Bottom Section */}
-      <div className="border-t border-sidebar-border p-4 bg-sidebar-muted/50">
-        {/* User Profile Section */}
-        <div className="mb-4 p-3 bg-sidebar-muted rounded-xl border border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-sidebar-accent rounded-full flex items-center justify-center text-sidebar-accent-foreground font-semibold text-sm shadow-lg">
-              JD
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-sidebar-foreground truncate">John Doe</div>
-              <div className="text-xs text-sidebar-muted-foreground truncate">Business Owner</div>
-            </div>
-            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+      <div className="border-t border-sidebar-border  ">
+        <div className="mb-4 px-4 border-b pb-1.5  ">
+          {/* Business Profile Selector */}
+          <div className=" ">
+            <label className="text-xs  px-3 pt-3   text-sidebar-foreground/70  block">
+              Select Business Profile
+            </label>
+            <Select
+              value={selectedProfile}
+              onValueChange={handleProfileChange}
+              disabled={isLoadingProfiles}
+            >
+              <SelectTrigger className="!bg-sidebar shadow-none w-full bg-sidebar-muted border-0 border-sidebar-border text-sidebar-foreground">
+                <div className="flex items-center gap-2 text-lg ¡font-bold">
+                  <SelectValue className="text-wrap ">
+                    {isLoadingProfiles ? 'Loading...' : getSelectedProfileName()}
+                  </SelectValue>
+                </div>
+              </SelectTrigger>
+              <SelectContent className="bg-sidebar border-sidebar-border">
+                <SelectItem value="all" className="text-sidebar-foreground hover:bg-sidebar-muted">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-sidebar-accent rounded-full"></div>
+                    All Profiles
+                  </div>
+                </SelectItem>
+                {businessProfiles.map((profile) => (
+                  <SelectItem
+                    key={profile.profileId}
+                    value={profile.profileId}
+                    className="text-sidebar-foreground hover:bg-sidebar-muted"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-sidebar-primary rounded-full"></div>
+                        <span className="truncate max-w-[120px]" title={profile?.profileName}>
+                          {profile?.profileName?.split('-')[1] || 'Unknown Profile'}
+                        </span>
+                      </div>
+                      <span className="text-xs bg-sidebar-accent text-sidebar-accent-foreground px-1.5 py-0.5 rounded-full ml-2">
+                        {profile.totalReviews}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* {selectedProfile !== 'all' && (
+              <div className="text-xs text-sidebar-muted-foreground mt-1">
+                Showing data for selected profile
+              </div>
+            )} */}
           </div>
         </div>
 
         {/* Bottom Navigation */}
-        <nav className="space-y-1">
+        <nav className="space-y-1 p-4">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const active = item.path ? isActive(item.path) : false;
