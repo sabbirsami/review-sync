@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
       // Get a sample document to check structure
       const sampleDoc = await testCollection.findOne();
       console.log('Sample document keys:', Object.keys(sampleDoc || {}));
+      console.log('Sample businessProfileId type:', typeof sampleDoc?.businessProfileId);
     } catch (dbError) {
       console.error('Database connection test failed:', dbError);
       throw new Error(
@@ -51,8 +52,16 @@ export async function GET(request: NextRequest) {
     const profileStats = await reviewService.getProfileStats();
     console.log('Profile stats fetched:', profileStats);
 
+    // Handle profileId filtering with both string and number comparisons
     if (profileId && profileId !== 'all') {
-      const profile = profileStats.find((p) => p.profileId === profileId);
+      const profile = profileStats.find(
+        (p) =>
+          p.profileId === profileId ||
+          p.profileName === profileId ||
+          p.profileId === Number(profileId).toString() ||
+          Number(p.profileId) === Number(profileId),
+      );
+
       if (profile) {
         return NextResponse.json({
           profile,
@@ -85,6 +94,7 @@ export async function GET(request: NextRequest) {
         details: {
           timestamp: new Date().toISOString(),
           endpoint: '/api/stats',
+          profileIdRequested: request.nextUrl.searchParams.get('profileId'),
         },
       },
       { status: 500 },

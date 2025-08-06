@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Review {
   reviewId: string;
@@ -38,12 +38,36 @@ interface Review {
 }
 
 interface RecentActivityProps {
-  recentReviews: Review[];
+  initialReviews?: Review[];
 }
 
-export default function RecentActivity({ recentReviews }: RecentActivityProps) {
+export default function RecentActivity({ initialReviews = [] }: RecentActivityProps) {
+  const [recentReviews, setRecentReviews] = useState<Review[]>(initialReviews);
+  const [loading, setLoading] = useState(!initialReviews.length);
   const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!initialReviews.length) {
+      fetchRecentReviews();
+    }
+  }, [initialReviews.length]);
+
+  const fetchRecentReviews = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/reviews?limit=4&page=1');
+      const data = await response.json();
+
+      if (data.success && data.data?.reviews) {
+        setRecentReviews(data.data.reviews);
+      }
+    } catch (error) {
+      console.error('Error fetching recent reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleReviewExpand = (reviewId: string) => {
     setExpandedReviews((prev) => ({
@@ -85,25 +109,25 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
       key={review?.reviewId}
       className="border-2 border-primary/80 bg-white flex flex-col overflow-hidden rounded-lg transition-shadow hover:shadow-xl duration-300"
     >
-      <CardContent className="px-6 flex flex-col">
+      <CardContent className="px-6 py-4 flex flex-col">
         {/* Header Section */}
         <div className="flex-shrink-0 mb-4">
           <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
                 <Image
-                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg'}
+                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg?height=32&width=32'}
                   alt={review?.reviewer?.displayName || 'Reviewer'}
                   width={32}
                   height={32}
                   className="object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    (e.target as HTMLImageElement).src = '/placeholder.svg?height=32&width=32';
                   }}
                 />
               </div>
               <div className="space-y-1">
-                <h4 className="font-semibold text-foreground text-sm grow">
+                <h4 className="font-semibold text-foreground text-sm">
                   {review?.reviewer?.displayName?.length > 20
                     ? `${review?.reviewer?.displayName?.slice(0, 20)}...`
                     : review?.reviewer?.displayName}
@@ -123,6 +147,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
             <div className="flex items-center gap-0.5">{getRatingStars(review?.starRating)}</div>
           </div>
         </div>
+
         {/* Review Content */}
         <div className="flex-grow flex flex-col">
           <div className="bg-[#F0EDE0]/0 rounded-sm mb-3 backdrop-blur-sm">
@@ -132,7 +157,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
                   expandedReviews[review?.reviewId] ? '' : 'line-clamp-3'
                 }`}
               >
-                {review?.comment ? review?.comment : 'No comment'}
+                {review?.comment || 'No comment provided'}
               </p>
               {review?.comment && review?.comment?.length > 150 && (
                 <button
@@ -154,6 +179,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
               )}
             </div>
           </div>
+
           {/* Action Section */}
           <div className="pt-2 text-xs border-t border-background">
             {review?.reviewReply ? (
@@ -221,6 +247,37 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <>
+        <div className="flex items-center justify-between mb-4 px-2">
+          <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
+          <div className="flex space-x-2">
+            <Download className="w-5 h-5 text-foreground/40" />
+            <MoreHorizontal className="w-5 h-5 text-foreground/40" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-lg p-6 animate-pulse">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded"></div>
+                <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="flex items-center justify-between mb-4 px-2">
@@ -230,7 +287,6 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
           <MoreHorizontal className="w-5 h-5 text-foreground/40 cursor-pointer hover:text-foreground" />
         </div>
       </div>
-
       {recentReviews.length > 0 ? (
         <div className="pb-10">
           <div className="grid grid-cols-2 gap-4">
@@ -238,7 +294,7 @@ export default function RecentActivity({ recentReviews }: RecentActivityProps) {
           </div>
           <div className="flex items-center justify-center mt-6">
             <Link
-              href="/reviews/all"
+              href="/review/all"
               className="rounded-full bg-primary px-10 py-3 text-center mx-auto text-white hover:shadow-xl hover:shadow-primary/15"
             >
               <span className="">View All Reviews</span>

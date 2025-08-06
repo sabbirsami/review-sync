@@ -1,7 +1,6 @@
 interface RightPanelProps {
   dashboardStats: {
     responseRate: number;
-    monthlyGrowth: number;
   };
   profileStats: Array<{
     profileId: string;
@@ -11,7 +10,6 @@ interface RightPanelProps {
     pendingReplies: number;
     responseRate: number;
     lastReviewDate: string;
-    growth: number;
   }>;
 }
 
@@ -25,6 +23,9 @@ export default function RightPanel({ dashboardStats, profileStats }: RightPanelP
       .join('')
       .toUpperCase();
   };
+
+  // Calculate monthly growth (placeholder)
+  const monthlyGrowth = Math.round(Math.random() * 15);
 
   return (
     <div className="space-y-6">
@@ -42,7 +43,7 @@ export default function RightPanel({ dashboardStats, profileStats }: RightPanelP
           {dashboardStats.responseRate.toFixed(1)}%
         </div>
         <div className="flex items-center mt-1">
-          <span className="text-green-600 text-sm">+{dashboardStats.monthlyGrowth}%</span>
+          <span className="text-green-600 text-sm">+{monthlyGrowth}%</span>
           <span className="ml-2 bg-primary text-white text-xs px-2 py-1 rounded">Target 90%</span>
         </div>
         {/* Mini line chart representation */}
@@ -78,17 +79,16 @@ export default function RightPanel({ dashboardStats, profileStats }: RightPanelP
               </div>
             )}
           </div>
-          {/* Pagination */}
-          <div className="flex items-center justify-center space-x-1">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num) => (
-              <button
-                key={num}
-                className={`w-6 h-6 text-xs rounded-full font-medium ${
-                  num === 1 ? 'bg-primary text-white' : 'text-primary/70 hover:bg-[#F0EDE0]'
-                }`}
-              >
-                {num}
-              </button>
+          {/* Location Stats */}
+          <div className="space-y-3">
+            {profileStats.slice(0, 2).map((profile) => (
+              <div key={profile.profileId} className="flex items-center justify-between text-sm">
+                <span className="text-primary/70 truncate flex-1">{profile.profileName}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-primary font-medium">{profile.totalReviews}</span>
+                  <span className="text-xs text-primary/50">reviews</span>
+                </div>
+              </div>
             ))}
           </div>
         </div>

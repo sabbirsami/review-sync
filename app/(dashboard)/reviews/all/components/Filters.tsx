@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,7 +10,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { exportToPdf } from '@/lib/generatePdf';
-
 import { Download, RefreshCw, Search } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
@@ -43,11 +43,9 @@ export default function Filters({
   const handleFilterChange = (name: string, value: string) => {
     router.push(pathname + '?' + createQueryString(name, value));
   };
-  const handleExport = async () => {
-    // Wait for any potential state updates
-    await new Promise((resolve) => setTimeout(resolve, 50));
 
-    // Try both possible container IDs
+  const handleExport = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 50));
     const container =
       document.getElementById('reviews-container') || document.querySelector('.reviews-container');
 
@@ -110,8 +108,8 @@ export default function Filters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Locations</SelectItem>
-          {uniqueProfiles.map((profile) => (
-            <SelectItem key={profile} value={profile}>
+          {uniqueProfiles.map((profile, index) => (
+            <SelectItem key={`profile-${profile}-${index}`} value={profile}>
               {profile}
             </SelectItem>
           ))}

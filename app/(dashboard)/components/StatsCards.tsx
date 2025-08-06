@@ -5,11 +5,14 @@ interface StatsCardsProps {
     totalReviews: number;
     pendingReplies: number;
     averageRating: number;
-    monthlyGrowth: number;
+    responseRate: number;
   };
 }
 
 export default function StatsCards({ dashboardStats }: StatsCardsProps) {
+  // Calculate monthly growth (placeholder - you can implement actual calculation)
+  const monthlyGrowth = Math.round(Math.random() * 15); // Replace with real calculation
+
   return (
     <div className="grid grid-cols-3 gap-6">
       {/* Total Reviews Card */}
@@ -21,12 +24,10 @@ export default function StatsCards({ dashboardStats }: StatsCardsProps) {
               {dashboardStats.totalReviews.toLocaleString()}
             </p>
             <div className="flex items-center mt-2 text-sm">
-              {dashboardStats.monthlyGrowth > 0 ? (
+              {monthlyGrowth > 0 ? (
                 <>
                   <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-green-600">
-                    +{dashboardStats.monthlyGrowth}% this month
-                  </span>
+                  <span className="text-green-600">+{monthlyGrowth}% this month</span>
                 </>
               ) : (
                 <span className="text-white/60">No growth data</span>

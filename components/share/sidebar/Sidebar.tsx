@@ -193,7 +193,7 @@ const Sidebar: React.FC = () => {
                   onValueChange={setOpenItem}
                 >
                   <AccordionItem value={`item-${index}`} className="border-none">
-                    <AccordionTrigger className="w-full py-3 px-4 hover:bg-sidebar-primary/10 hover:border hover:border-sidebar-primary/30 rounded-xl text-sm font-medium text-sidebar-foreground hover:text-sidebar-primary hover:no-underline group transition-all duration-200">
+                    <AccordionTrigger className="w-full cursor-pointer py-3 px-4 hover:bg-sidebar-primary/10 hover:border hover:border-sidebar-primary/30 rounded-xl text-sm font-medium text-sidebar-foreground hover:text-sidebar-primary hover:no-underline group transition-all duration-200">
                       <span className="flex items-center justify-between w-full">
                         <span className="flex items-center gap-3">
                           <span className="group-hover:text-primary transition-colors">

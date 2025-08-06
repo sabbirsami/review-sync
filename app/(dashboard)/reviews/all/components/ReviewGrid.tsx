@@ -17,18 +17,20 @@ export default function ReviewGrid({
   filterRating: string;
   filterProfile: string;
 }) {
-  const filteredReviews = reviews.filter((review) => {
+  const filteredReviews = reviews?.filter((review) => {
     const matchesSearch =
-      review.comment?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.reviewer.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.businessProfileName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || review.replyStatus === filterStatus;
-    const matchesRating = filterRating === 'all' || review.starRating === filterRating;
-    const matchesProfile = filterProfile === 'all' || review.businessProfileName === filterProfile;
+      review?.comment?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review?.reviewer?.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review?.businessProfileName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = filterStatus === 'all' || review?.replyStatus === filterStatus;
+    const matchesRating = filterRating === 'all' || review?.starRating === filterRating;
+    const matchesProfile = filterProfile === 'all' || review?.businessProfileName === filterProfile;
+
     return matchesSearch && matchesStatus && matchesRating && matchesProfile;
   });
 
-  if (filteredReviews.length === 0) {
+  if (filteredReviews?.length === 0) {
     return (
       <Card className="border border-[#D1D9D8] bg-white">
         <CardContent className="py-16">
@@ -53,7 +55,7 @@ export default function ReviewGrid({
   return (
     <div id="reviews-container" className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {(() => {
-        const totalCardInRow = Math.ceil(filteredReviews.length / 4);
+        const totalCardInRow = Math.ceil(filteredReviews?.length / 4);
         const row1 = 0 + totalCardInRow;
         const row2 = row1 + totalCardInRow;
         const row3 = row2 + totalCardInRow;
@@ -62,30 +64,30 @@ export default function ReviewGrid({
         return (
           <>
             {/* Column 1 */}
-            <div className="grid 2xl:gap-3 gap-4">
-              {filteredReviews.slice(0, row1).map((review) => (
-                <ReviewCard key={review.reviewId} review={review} />
+            <div key="column-1" className="grid 2xl:gap-3 gap-4">
+              {filteredReviews?.slice(0, row1).map((review, index) => (
+                <ReviewCard key={`col1-${review?.reviewId}-${index}`} review={review} />
               ))}
             </div>
 
             {/* Column 2 */}
-            <div className="grid 2xl:gap-3 gap-4">
-              {filteredReviews.slice(row1, row2).map((review) => (
-                <ReviewCard key={review.reviewId} review={review} />
+            <div key="column-2" className="grid 2xl:gap-3 gap-4">
+              {filteredReviews?.slice(row1, row2).map((review, index) => (
+                <ReviewCard key={`col2-${review?.reviewId}-${index}`} review={review} />
               ))}
             </div>
 
             {/* Column 3 */}
-            <div className="grid 2xl:gap-3 gap-4">
-              {filteredReviews.slice(row2, row3).map((review) => (
-                <ReviewCard key={review.reviewId} review={review} />
+            <div key="column-3" className="grid 2xl:gap-3 gap-4">
+              {filteredReviews?.slice(row2, row3).map((review, index) => (
+                <ReviewCard key={`col3-${review?.reviewId}-${index}`} review={review} />
               ))}
             </div>
 
             {/* Column 4 */}
-            <div className="grid 2xl:gap-3 gap-4">
-              {filteredReviews.slice(row3, row4).map((review) => (
-                <ReviewCard key={review.reviewId} review={review} />
+            <div key="column-4" className="grid 2xl:gap-3 gap-4">
+              {filteredReviews?.slice(row3, row4).map((review, index) => (
+                <ReviewCard key={`col4-${review?.reviewId}-${index}`} review={review} />
               ))}
             </div>
           </>

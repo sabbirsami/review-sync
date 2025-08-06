@@ -10,7 +10,7 @@ interface RatingDistributionProps {
 export default function RatingDistribution({ dashboardStats }: RatingDistributionProps) {
   return (
     <div className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow duration-400 border-2 border-chart-1/80 shadow-chart-1/15">
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between mb-8">
         <h3 className="text-lg font-semibold text-primary">Rating Distribution</h3>
       </div>
 
