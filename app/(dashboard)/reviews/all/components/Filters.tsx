@@ -47,7 +47,7 @@ export default function Filters({
     return () => {
       clearTimeout(handler);
     };
-  }, [localSearchTerm, searchParams]); // Depend on localSearchTerm and searchParams
+  }, [localSearchTerm, searchParams, searchTerm]); // Depend on localSearchTerm and searchParams
 
   // Keep localSearchTerm in sync with external searchTerm prop (e.g., on page load or clear filters)
   useEffect(() => {

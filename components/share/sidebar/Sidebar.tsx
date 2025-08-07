@@ -16,7 +16,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import SettingsPanel from '../SettingsPanel';
 
-// Enhanced Icons
+// Enhanced Icons (same as before)
 const DashboardIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -76,6 +76,7 @@ const Sidebar: React.FC = () => {
   const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+  const [isProfileChanging, setIsProfileChanging] = useState(false); // New state for profile change loading
 
   // Fetch business profiles on component mount
   useEffect(() => {
@@ -85,9 +86,9 @@ const Sidebar: React.FC = () => {
   // Set selected profile from URL or default to first profile
   useEffect(() => {
     const profileIdFromUrl = searchParams.get('profileId');
-    if (profileIdFromUrl) {
+    if (profileIdFromUrl && profileIdFromUrl !== selectedProfile) {
       setSelectedProfile(profileIdFromUrl);
-    } else if (businessProfiles.length > 0 && !selectedProfile) {
+    } else if (businessProfiles.length > 0 && !selectedProfile && !profileIdFromUrl) {
       // Default to first business profile
       const firstProfile = businessProfiles[0];
       setSelectedProfile(firstProfile.profileId);
@@ -113,13 +114,22 @@ const Sidebar: React.FC = () => {
     }
   };
 
-  const handleProfileChange = (profileId: string) => {
+  const handleProfileChange = async (profileId: string) => {
+    if (profileId === selectedProfile) return; // Prevent unnecessary changes
+
+    setIsProfileChanging(true); // Start loading
     setSelectedProfile(profileId);
+
     // Update URL with the selected profileId
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('profileId', profileId);
     // Use router.replace to update URL without page reload
     router.replace(`${pathname}${currentUrl.search}`);
+
+    // Add a small delay to show loading state
+    setTimeout(() => {
+      setIsProfileChanging(false);
+    }, 1000);
   };
 
   const getSelectedProfileName = () => {
@@ -127,6 +137,7 @@ const Sidebar: React.FC = () => {
     return profile ? profile?.profileName?.split('-')[1] : 'Loading...';
   };
 
+  // Rest of the component remains the same until the Select section
   const menuItems: NavItem[] = [
     {
       path: '/',
@@ -136,42 +147,8 @@ const Sidebar: React.FC = () => {
     {
       label: 'Reviews',
       icon: ReviewsIcon,
-      // badge: '24',
-      subRoutes: [
-        { path: '/reviews/all', label: 'All Reviews', icon: ReviewsIcon, badge: '' },
-        // { path: '/reviews/pending', label: 'Pending Replies', icon: ReviewsIcon, badge: '12' },
-        // { path: '/reviews/replied', label: 'Replied', icon: ReviewsIcon, badge: '62' },
-        // { path: '/reviews/negative', label: 'Negative Reviews', icon: ReviewsIcon, badge: '3' },
-      ],
+      subRoutes: [{ path: '/reviews/all', label: 'All Reviews', icon: ReviewsIcon, badge: '' }],
     },
-    // {
-    //   label: 'Business Profiles',
-    //   icon: BusinessIcon,
-    //   subRoutes: [
-    //     { path: '/business-profiles/1', label: 'Main Branch', icon: BusinessIcon, badge: '32' },
-    //     { path: '/business-profiles/2', label: 'Downtown', icon: BusinessIcon, badge: '28' },
-    //     { path: '/business-profiles/3', label: 'Mall Branch', icon: BusinessIcon, badge: '14' },
-    //   ],
-    // },
-    // {
-    //   label: 'Analytics',
-    //   icon: AnalyticsIcon,
-    //   subRoutes: [
-    //     { path: '/analytics/response-rate', label: 'Response Rate', icon: AnalyticsIcon },
-    //     { path: '/analytics/rating-trends', label: 'Rating Trends', icon: AnalyticsIcon },
-    //     { path: '/analytics/sentiment', label: 'Sentiment Analysis', icon: AnalyticsIcon },
-    //   ],
-    // },
-    // {
-    //   label: 'Automation',
-    //   icon: AutomationIcon,
-    //   badge: 'NEW',
-    //   subRoutes: [
-    //     { path: '/automation/workflows', label: 'AI Workflows', icon: AutomationIcon },
-    //     { path: '/automation/templates', label: 'Reply Templates', icon: AutomationIcon },
-    //     { path: '/automation/settings', label: 'Auto-Reply Settings', icon: AutomationIcon },
-    //   ],
-    // },
   ];
 
   const bottomNavItems: NavItem[] = [
@@ -317,16 +294,26 @@ const Sidebar: React.FC = () => {
 
       {/* Enhanced Bottom Section */}
       <div className="border-t border-sidebar-border">
-        <div className="mb-2 px-1 shadow-lg shadow-primary/5 border-primary/40 border mt-4 mx-4 pb-0.5 rounded-2xl">
+        <div className="mb-2 px-1 shadow-lg shadow-primary/5 border-primary/40 border mt-4 mx-4 pb-0.5 rounded-2xl relative">
           {/* Business Profile Selector */}
           <label className="text-xs px-3 pt-2.5 -mb-1 text-sidebar-foreground/70 block">
             Select Business Profile
           </label>
-          <div>
+          <div className="relative">
+            {/* Loading Overlay */}
+            {isProfileChanging && (
+              <div className="absolute inset-0 bg-sidebar z-10 flex items-center justify-start ms-3 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary/20 border-t-primary"></div>
+                  <span className="text-sm text-primary">Loading...</span>
+                </div>
+              </div>
+            )}
+
             <Select
               value={selectedProfile}
               onValueChange={handleProfileChange}
-              disabled={isLoadingProfiles}
+              disabled={isLoadingProfiles || isProfileChanging}
             >
               <SelectTrigger className="!bg-sidebar shadow-none w-full bg-sidebar-muted border-0 border-sidebar-border text-sidebar-foreground">
                 <div className="flex items-center gap-2 text-sidebar-foreground text-lg font-semibold">
