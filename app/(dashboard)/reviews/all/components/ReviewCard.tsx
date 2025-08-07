@@ -38,16 +38,33 @@ export default function ReviewCard({ review }: { review: ReviewDocument }) {
           <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                <Image
-                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg?height=32&width=32'}
-                  alt={review?.reviewer?.displayName || 'Reviewer'}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg?height=32&width=32';
-                  }}
-                />
+                {review?.reviewer?.profilePhotoUrl && !review?.reviewer?.profilePhotoUrl.includes('googleusercontent.com') ? (
+                  <Image
+                    src={review.reviewer.profilePhotoUrl}
+                    alt={review?.reviewer?.displayName || 'Reviewer'}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/avatar-placeholder.svg';
+                      target.onerror = null;
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={review?.reviewer?.profilePhotoUrl || '/avatar-placeholder.svg'}
+                    alt={review?.reviewer?.displayName || 'Reviewer'}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/avatar-placeholder.svg';
+                      target.onerror = null;
+                    }}
+                  />
+                )}
               </div>
               <div className="space-y-1">
                 <h4 className="font-semibold text-foreground text-sm">

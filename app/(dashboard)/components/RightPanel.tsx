@@ -46,7 +46,7 @@ export default function RightPanel({ dashboardStats, profileStats }: RightPanelP
           <span className="text-green-600 text-sm">+{monthlyGrowth}%</span>
           <span className="ml-2 bg-primary text-white text-xs px-2 py-1 rounded">Target 90%</span>
         </div>
-        {/* Mini line chart representation */}
+
         <div className="mt-4 h-16 flex items-end space-x-1">
           {[20, 35, 25, 45, 30, 50, 40, 60, 45, 55, 35, 50].map((height, i) => (
             <div

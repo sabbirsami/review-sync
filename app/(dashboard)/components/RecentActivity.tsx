@@ -7,15 +7,12 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Download,
   Eye,
   MessageCircle,
-  MoreHorizontal,
   Sparkles,
   Star,
 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -126,16 +123,33 @@ export default function RecentActivity({ initialReviews = [], profileId }: Recen
           <div className="flex items-center justify-between gap-4 mb-1">
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                <Image
-                  src={review?.reviewer?.profilePhotoUrl || '/placeholder.svg?height=32&width=32'}
-                  alt={review?.reviewer?.displayName || 'Reviewer'}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg?height=32&width=32';
-                  }}
-                />
+                {review?.reviewer?.profilePhotoUrl && !review?.reviewer?.profilePhotoUrl.includes('googleusercontent.com') ? (
+                  <Image
+                    src={review.reviewer.profilePhotoUrl}
+                    alt={review?.reviewer?.displayName || 'Reviewer'}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/avatar-placeholder.svg';
+                      target.onerror = null;
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={review?.reviewer?.profilePhotoUrl || '/avatar-placeholder.svg'}
+                    alt={review?.reviewer?.displayName || 'Reviewer'}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/avatar-placeholder.svg';
+                      target.onerror = null;
+                    }}
+                  />
+                )}
               </div>
               <div className="space-y-1">
                 <h4 className="font-semibold text-foreground text-sm">
@@ -263,10 +277,10 @@ export default function RecentActivity({ initialReviews = [], profileId }: Recen
       <>
         <div className="flex items-center justify-between mb-4 px-2">
           <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
-          <div className="flex space-x-2">
+          {/* <div className="flex space-x-2">
             <Download className="w-5 h-5 text-foreground/40" />
             <MoreHorizontal className="w-5 h-5 text-foreground/40" />
-          </div>
+          </div> */}
         </div>
         <div className="grid grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -293,24 +307,24 @@ export default function RecentActivity({ initialReviews = [], profileId }: Recen
     <>
       <div className="flex items-center justify-between mb-4 px-2">
         <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
-        <div className="flex space-x-2">
+        {/* <div className="flex space-x-2">
           <Download className="w-5 h-5 text-foreground/40 cursor-pointer hover:text-foreground" />
           <MoreHorizontal className="w-5 h-5 text-foreground/40 cursor-pointer hover:text-foreground" />
-        </div>
+        </div> */}
       </div>
       {recentReviews.length > 0 ? (
         <div className="pb-10">
           <div className="grid grid-cols-2 gap-4">
             {recentReviews.map((review) => renderReviewCard(review))}
           </div>
-          <div className="flex items-center justify-center mt-6">
+          {/* <div className="flex items-center justify-center mt-6">
             <Link
               href="/review/all"
               className="rounded-full bg-primary px-10 py-3 text-center mx-auto text-white hover:shadow-xl hover:shadow-primary/15"
             >
               <span className="">View All Reviews</span>
             </Link>
-          </div>
+          </div> */}
         </div>
       ) : (
         <div className="h-[200px] flex items-center justify-center border- border-chart-1/80 shadow-chart-1/15 text-foreground/60">

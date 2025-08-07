@@ -1,11 +1,9 @@
 import Header from '@/components/share/header/Header';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoadingError from './components/LoadingError';
 import RatingDistribution from './components/RatingDistribution';
 import RecentActivity from './components/RecentActivity';
 import ResponsePerformance from './components/ResponsePerformance';
 import ReviewTrends from './components/ReviewTrends';
-import RightPanel from './components/RightPanel';
 import StatsCards from './components/StatsCards';
 
 export default async function DashboardPage({
@@ -69,7 +67,7 @@ export default async function DashboardPage({
       <div className="bg-white border-b border-primary/50 pt-4">
         <Header title={'Business Analytics'} />
         {/* Tabs */}
-        <div className="px-6 sticky top-0 bg-white">
+        {/* <div className="px-6 sticky top-0 bg-white">
           <Tabs value={activeTab} className="sticky top-[68px] ¡bg-white z-10">
             <TabsList className="bg-white p-0 h-auto">
               {['Value comparison', 'Average values', 'Configure analysis', 'Filter analysis'].map(
@@ -89,7 +87,7 @@ export default async function DashboardPage({
               )}
             </TabsList>
           </Tabs>
-        </div>
+        </div> */}
       </div>
 
       {/* Content */}
@@ -109,14 +107,14 @@ export default async function DashboardPage({
           dashboardStats={dashboardStats}
           profileId={selectedProfileId} // Pass profileId to ResponsePerformance
         />
-        <div className="grid grid-cols-3 gap-6">
+        <div className=" grid-cols-3 gap-6">
           <div className="col-span-2 pt-2">
             <RecentActivity
               initialReviews={recentReviews}
               profileId={selectedProfileId} // Pass profileId to RecentActivity
             />
           </div>
-          <RightPanel dashboardStats={dashboardStats} profileStats={profileStats} />
+          {/* <RightPanel dashboardStats={dashboardStats} profileStats={profileStats} /> */}
         </div>
       </div>
     </div>

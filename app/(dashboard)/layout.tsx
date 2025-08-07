@@ -1,4 +1,3 @@
-import ChatSheet from '@/components/chat/chat-sheet';
 import Sidebar from '@/components/share/sidebar/Sidebar';
 
 const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
@@ -10,7 +9,7 @@ const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         </div>
         <div className="col-span-10 bg-slate-50">{children}</div>
       </div>
-      <ChatSheet />
+      {/* <ChatSheet /> */}
     </section>
   );
 };
