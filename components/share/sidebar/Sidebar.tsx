@@ -152,7 +152,7 @@ const Sidebar: React.FC = () => {
   ];
 
   const bottomNavItems: NavItem[] = [
-    { path: '/help', label: 'Help Center', icon: HelpIcon },
+    // { path: '/help', label: 'Help Center', icon: HelpIcon },
     { label: 'Settings', icon: SettingsIcon, isSheet: true },
   ];
 
@@ -357,7 +357,7 @@ const Sidebar: React.FC = () => {
                 <Sheet key={item.label} open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                   <SheetTrigger asChild>
                     <button
-                      className={`group hover:bg-sidebar-muted hover:text-sidebar-foreground flex cursor-pointer items-center w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      className={`group dark:hover:!bg-sidebar-muted hover:text-sidebar-foreground flex cursor-pointer items-center w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                         active
                           ? 'bg-sidebar-muted text-sidebar-foreground border border-sidebar-border'
                           : 'text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground'
@@ -403,9 +403,9 @@ const Sidebar: React.FC = () => {
         </nav>
 
         {/* Version Info */}
-        <div className="mt-4 mb-1 text-center">
+        {/* <div className="mt-4 mb-1 text-center">
           <div className="text-xs text-sidebar-muted-foreground">v2.1.0</div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
