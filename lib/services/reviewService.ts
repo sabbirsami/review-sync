@@ -451,7 +451,51 @@ export class ReviewService {
       throw error;
     }
   }
+  async getReviewsByBusinessProfileId(businessProfileId: string): Promise<ReviewDocument[]> {
+    try {
+      const collection = await this.getCollection('reviews');
 
+      const pipeline = [
+        {
+          $match: {
+            $or: [
+              { businessProfileId: businessProfileId },
+              { businessProfileId: Number(businessProfileId) },
+            ],
+          },
+        },
+        { $unwind: '$reviews' },
+        {
+          $addFields: {
+            'reviews.businessProfileId': { $toString: '$businessProfileId' },
+            'reviews.businessProfileName': '$businessProfileName',
+            'reviews.executionTimestamp': '$executionTimestamp',
+            'reviews.replyStatus': {
+              $cond: {
+                if: {
+                  $and: [
+                    { $ne: ['$reviews.reviewReply', null] },
+                    { $ne: ['$reviews.reviewReply.comment', null] },
+                    { $ne: ['$reviews.reviewReply.comment', ''] },
+                  ],
+                },
+                then: 'replied',
+                else: 'pending',
+              },
+            },
+          },
+        },
+        { $replaceRoot: { newRoot: '$reviews' } },
+        { $sort: { createTime: -1 } },
+      ];
+
+      const reviews = await collection.aggregate(pipeline).toArray();
+      return reviews as ReviewDocument[];
+    } catch (error) {
+      console.error('Error in getReviewsByBusinessProfileId:', error);
+      return [];
+    }
+  }
   async updateReview(
     reviewId: string,
     updateData: Partial<ReviewDocument>,

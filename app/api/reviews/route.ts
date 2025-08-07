@@ -1,5 +1,5 @@
 import { reviewService } from '@/lib/services/reviewService';
-import { GoogleReviewsResponse, ReviewDocument } from '@/types/review';
+import { ReviewDocument } from '@/types/review';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -61,16 +61,108 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: GoogleReviewsResponse = await request.json();
+    const body = await request.json();
     console.log('Received review data:', body);
 
-    // Handle the new bulk review format
-    if (body.reviews && Array.isArray(body.reviews)) {
-      const createdReviews = await Promise.all(
-        body.reviews.map((review) => {
+    // Handle case where client sends an array of business profiles with reviews
+    if (Array.isArray(body)) {
+      const results = [];
+
+      for (const businessProfile of body) {
+        if (!businessProfile.reviews || !Array.isArray(businessProfile.reviews)) {
+          continue;
+        }
+
+        const businessProfileId = businessProfile.businessProfileId.toString();
+
+        // Check if any reviews already exist for this businessProfileId
+        const existingReviews = await reviewService.getReviewsByBusinessProfileId(
+          businessProfileId,
+        );
+        const existingReviewIds = new Set(existingReviews.map((r) => r.reviewId));
+
+        const reviewsToProcess = [];
+        let newReviewsCount = 0;
+        let updatedReviewsCount = 0;
+
+        for (const review of businessProfile.reviews) {
+          if (existingReviewIds.has(review.reviewId)) {
+            // Update existing review
+            const reviewData: Partial<ReviewDocument> = {
+              starRating: review.starRating,
+              comment: review.comment || '',
+              updateTime: review.updateTime,
+              reviewReply: review.reviewReply,
+              replyStatus: review.reviewReply ? 'replied' : 'pending',
+            };
+            await reviewService.updateReview(review.reviewId, reviewData);
+            updatedReviewsCount++;
+          } else {
+            // Create new review
+            const reviewData: ReviewDocument = {
+              reviewId: review.reviewId,
+              businessProfileId,
+              businessProfileName: businessProfile.businessProfileName,
+              executionTimestamp: businessProfile.executionTimestamp,
+              reviewer: review.reviewer,
+              starRating: review.starRating,
+              comment: review.comment || '',
+              createTime: review.createTime,
+              updateTime: review.updateTime,
+              reviewReply: review.reviewReply,
+              replyStatus: review.reviewReply ? 'replied' : 'pending',
+              name: review.name,
+            };
+            reviewsToProcess.push(reviewService.createReview(reviewData));
+            newReviewsCount++;
+          }
+        }
+
+        // Execute all create operations in parallel
+        await Promise.all(reviewsToProcess);
+
+        results.push({
+          businessProfileId,
+          newReviewsCount,
+          updatedReviewsCount,
+          success: true,
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Processed reviews for ${results.length} business profiles`,
+        results,
+      });
+    }
+    // Handle case where client sends a single business profile with reviews
+    else if (body.reviews && Array.isArray(body.reviews)) {
+      const businessProfileId = body.businessProfileId.toString();
+
+      const existingReviews = await reviewService.getReviewsByBusinessProfileId(businessProfileId);
+      const existingReviewIds = new Set(existingReviews.map((r) => r.reviewId));
+
+      const reviewsToProcess = [];
+      let newReviewsCount = 0;
+      let updatedReviewsCount = 0;
+
+      for (const review of body.reviews) {
+        if (existingReviewIds.has(review.reviewId)) {
+          // Update existing review
+          const reviewData: Partial<ReviewDocument> = {
+            starRating: review.starRating,
+            comment: review.comment || '',
+            updateTime: review.updateTime,
+            reviewReply: review.reviewReply,
+            replyStatus: review.reviewReply ? 'replied' : 'pending',
+          };
+          await reviewService.updateReview(review.reviewId, reviewData);
+          updatedReviewsCount++;
+        } else {
+          // Create new review
           const reviewData: ReviewDocument = {
             reviewId: review.reviewId,
-            businessProfileId: body.businessProfileId.toString(),
+            businessProfileId,
             businessProfileName: body.businessProfileName,
             executionTimestamp: body.executionTimestamp,
             reviewer: review.reviewer,
@@ -82,30 +174,37 @@ export async function POST(request: NextRequest) {
             replyStatus: review.reviewReply ? 'replied' : 'pending',
             name: review.name,
           };
-          return reviewService.createReview(reviewData);
-        }),
-      );
+          reviewsToProcess.push(reviewService.createReview(reviewData));
+          newReviewsCount++;
+        }
+      }
+
+      // Execute all create operations in parallel
+      await Promise.all(reviewsToProcess);
 
       return NextResponse.json({
         success: true,
-        message: `Processed ${createdReviews.length} reviews`,
-        count: createdReviews.length,
+        message: `Processed ${body.reviews.length} reviews`,
+        newReviewsCount,
+        updatedReviewsCount,
+        totalProcessed: newReviewsCount + updatedReviewsCount,
       });
     } else {
       return NextResponse.json(
         {
           success: false,
-          message: 'Invalid data format. Expected reviews array.',
+          message:
+            'Invalid data format. Expected array of business profiles with reviews or single business profile with reviews array.',
         },
         { status: 400 },
       );
     }
   } catch (error) {
-    console.error('Error creating review:', error);
+    console.error('Error processing reviews:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to create review',
+        message: 'Failed to process reviews',
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
